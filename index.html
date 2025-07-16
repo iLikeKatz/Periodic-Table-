@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Periodic Table Flashcard Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div id="selection-screen">
+        <h1>เลือกธาตุเพื่อสร้าง Flashcard 🧪</h1>
+        <p>คลิกบนธาตุที่ต้องการในตารางด้านล่าง จากนั้นกด "เริ่มเกม"</p>
+        <div id="controls">
+            <button id="select-all-btn">เลือกทั้งหมด</button>
+            <button id="deselect-all-btn">ยกเลิกทั้งหมด</button>
+            <button id="start-game-btn">▶️ เริ่มเกม</button>
+        </div>
+        <div id="periodic-table-container">
+            <div id="periodic-table"></div>
+        </div>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <h1>Flashcard สุ่มธาตุ</h1>
+        <div class="flashcard-container">
+            <div class="flashcard" id="flashcard">
+                <div class="card-face card-front" id="card-front">
+                </div>
+                <div class="card-face card-back" id="card-back">
+                </div>
+            </div>
+        </div>
+        <div id="game-controls">
+            <button id="flip-card-btn">พลิกการ์ด</button>
+            <button id="next-card-btn">การ์ดถัดไป ⏭️</button>
+            <button id="back-to-selection-btn">กลับไปหน้าเลือกธาตุ</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
