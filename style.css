@@ -86,7 +86,7 @@ button {
 
 #periodic-table-container {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     overflow-x: auto;
     /* Allow horizontal scroll on small screens */
     padding-bottom: 15px;
@@ -101,8 +101,8 @@ button {
     background-color: var(--table-bg);
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: max-content;
-    min-width: unset;
+    width: 100%;
+    min-width: 1200px;
     /* Minimum width to prevent collapsing */
 }
 
@@ -289,15 +289,13 @@ button {
 
 @media (max-width: 768px) {
     body {
-        display: block;
-        /* เปลี่ยนจาก flex เป็น block */
-        padding-top: 20px;
-        /* เพิ่มช่องว่างด้านบนนิดหน่อย */
+        padding: 10px;
     }
     h1 {
         font-size: 1.8rem;
     }
     #periodic-table {
+        min-width: 900px;
         grid-template-columns: repeat(18, 50px);
         grid-template-rows: repeat(10, 50px);
         gap: 3px;
