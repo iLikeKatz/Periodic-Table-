@@ -289,7 +289,10 @@ button {
 
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        display: block;
+        /* เปลี่ยนจาก flex เป็น block */
+        padding-top: 20px;
+        /* เพิ่มช่องว่างด้านบนนิดหน่อย */
     }
     h1 {
         font-size: 1.8rem;
