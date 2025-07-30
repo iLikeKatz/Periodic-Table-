@@ -69,6 +69,7 @@ button {
 
 #select-all-btn,
 #deselect-all-btn,
+#select-main-groups-btn,
 #flip-card-btn,
 #back-to-selection-btn {
     background-color: var(--secondary-btn-bg);
@@ -76,6 +77,7 @@ button {
 
 #select-all-btn:hover,
 #deselect-all-btn:hover,
+#select-main-groups-btn:hover,
 #flip-card-btn:hover,
 #back-to-selection-btn:hover {
     background-color: var(--secondary-btn-hover);
@@ -102,7 +104,7 @@ button {
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     width: 100%;
-    min-width: 1200px;
+    min-width: unset;
     /* Minimum width to prevent collapsing */
 }
 
@@ -282,6 +284,87 @@ button {
 .card-back p {
     margin: 5px 0;
     font-size: 1.1rem;
+}
+
+
+/* --- Styles for Checkbox Control --- */
+
+.controls {
+    display: flex;
+    /* ทำให้ปุ่มและ checkbox เรียงเป็นแถว */
+    flex-wrap: wrap;
+    /* ให้ขึ้นบรรทัดใหม่ได้ถ้าหน้าจอเล็ก */
+    gap: 15px;
+    /* ระยะห่างระหว่างปุ่ม/checkbox */
+    justify-content: center;
+    /* จัดให้อยู่กึ่งกลาง */
+    align-items: center;
+    /* จัดให้อยู่กึ่งกลางในแนวตั้ง */
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f0f0f0;
+    /* สีพื้นหลังอ่อนๆ */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.checkbox-control {
+    display: flex;
+    align-items: center;
+    /* จัดให้ข้อความและ checkbox อยู่ในแนวเดียวกัน */
+    gap: 8px;
+    /* ระยะห่างระหว่าง checkbox กับ label */
+    font-size: 1.1em;
+    /* ขนาดฟอนต์สำหรับข้อความ */
+    color: #333;
+    user-select: none;
+    /* ป้องกันการเลือกข้อความ */
+}
+
+.checkbox-control input[type="checkbox"] {
+    /* ปรับขนาดของ checkbox */
+    width: 20px;
+    height: 20px;
+    /* เปลี่ยนรูปลักษณ์ของ checkbox (อาจต้องใช้ -webkit-appearance สำหรับการปรับแต่งเพิ่มเติมในบางเบราว์เซอร์) */
+    appearance: none;
+    -webkit-appearance: none;
+    border: 2px solid #555;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    position: relative;
+    top: 2px;
+    /* ปรับตำแหน่งเล็กน้อยหากจำเป็น */
+}
+
+
+/* เมื่อ checkbox ถูกเลือก */
+
+.checkbox-control input[type="checkbox"]:checked {
+    background-color: #4CAF50;
+    /* สีเขียวเมื่อเลือก */
+    border-color: #4CAF50;
+}
+
+
+/* สร้างเครื่องหมายถูก */
+
+.checkbox-control input[type="checkbox"]:checked::after {
+    content: '✔';
+    /* ใช้เครื่องหมายถูก unicode */
+    font-size: 14px;
+    color: #fff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+    /* ปรับ line-height เพื่อจัดกึ่งกลาง */
+}
+
+.checkbox-control label {
+    cursor: pointer;
+    /* ทำให้คลิกที่ข้อความก็เลือก checkbox ได้ */
 }
 
 
