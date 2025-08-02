@@ -1,3 +1,5 @@
+/* --- Root Variables --- */
+
 :root {
     --bg-color: #f0f2f5;
     --table-bg: #ffffff;
@@ -6,7 +8,13 @@
     --primary-btn-hover: #0056b3;
     --secondary-btn-bg: #6c757d;
     --secondary-btn-hover: #5a6268;
+    --card-back-bg: #f8f9fa;
+    --card-back-text: #333;
+    --border-color: #ccc;
 }
+
+
+/* --- Base Styles --- */
 
 body {
     font-family: 'IBM Plex Sans Thai', sans-serif;
@@ -14,10 +22,16 @@ body {
     color: var(--text-color);
     margin: 0;
     padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#selection-screen,
+#game-screen,
+#fill-game-screen {
+    /* Added fill-game-screen */
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
     text-align: center;
 }
 
@@ -25,24 +39,8 @@ body {
     display: none !important;
 }
 
-#selection-screen,
-#game-screen {
-    width: 100%;
-    max-width: 1400px;
-}
-
 h1 {
-    color: #333;
     font-size: 2.2rem;
-}
-
-#controls,
-#game-controls {
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
 }
 
 button {
@@ -54,7 +52,18 @@ button {
     cursor: pointer;
     color: white;
     transition: background-color 0.2s;
-    flex-shrink: 0;
+}
+
+#controls,
+#game-controls,
+#fill-game-controls {
+    /* Added fill-game-controls */
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 #start-game-btn,
@@ -84,28 +93,36 @@ button {
 }
 
 
-/* --- Periodic Table Styling --- */
+/* --- Checkbox Control --- */
+
+.checkbox-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-control label {
+    cursor: pointer;
+}
+
+
+/* --- Periodic Table --- */
 
 #periodic-table-container {
-    display: flex;
-    justify-content: flex-start;
     overflow-x: auto;
-    /* Allow horizontal scroll on small screens */
     padding-bottom: 15px;
 }
 
 #periodic-table {
     display: grid;
     grid-template-columns: repeat(18, minmax(60px, 1fr));
-    grid-template-rows: repeat(10, minmax(60px, 1fr));
+    grid-auto-rows: minmax(60px, 1fr);
     gap: 5px;
     padding: 10px;
     background-color: var(--table-bg);
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    min-width: unset;
-    /* Minimum width to prevent collapsing */
+    min-width: 1200px;
 }
 
 .element {
@@ -119,7 +136,6 @@ button {
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     font-size: 0.7rem;
-    font-weight: 500;
 }
 
 .element:hover {
@@ -146,7 +162,7 @@ button {
 }
 
 
-/* --- Element Colors by Category --- */
+/* --- Element Colors --- */
 
 .alkali-metal {
     background-color: #ffadad;
@@ -176,8 +192,8 @@ button {
     background-color: #bdb2ff;
 }
 
-.polyatomic-nonmetal,
-.diatomic-nonmetal {
+.diatomic-nonmetal,
+.polyatomic-nonmetal {
     background-color: #ffc6ff;
 }
 
@@ -185,23 +201,16 @@ button {
     background-color: #f2c6de;
 }
 
-.unknown {
-    background-color: #e9ecef;
-    border-color: #adb5bd;
-}
 
-
-/* --- Color Legend --- */
+/* --- Legend --- */
 
 #legend {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 15px;
-    margin-top: 20px;
+    margin: 20px auto;
     max-width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .legend-item {
@@ -219,7 +228,7 @@ button {
 }
 
 
-/* --- Flashcard Styling --- */
+/* --- Flashcard --- */
 
 .flashcard-container {
     perspective: 1000px;
@@ -256,6 +265,7 @@ button {
     align-items: center;
     padding: 20px;
     box-sizing: border-box;
+    text-align: center;
 }
 
 .card-front {
@@ -269,9 +279,14 @@ button {
     font-weight: bold;
 }
 
+.card-front-name {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
 .card-back {
-    background-color: #f8f9fa;
-    color: #333;
+    background-color: var(--card-back-bg);
+    color: var(--card-back-text);
     transform: rotateY(180deg);
 }
 
@@ -287,84 +302,455 @@ button {
 }
 
 
-/* --- Styles for Checkbox Control --- */
+/* --- Settings Button & Modal --- */
 
-.controls {
-    display: flex;
-    /* ทำให้ปุ่มและ checkbox เรียงเป็นแถว */
-    flex-wrap: wrap;
-    /* ให้ขึ้นบรรทัดใหม่ได้ถ้าหน้าจอเล็ก */
-    gap: 15px;
-    /* ระยะห่างระหว่างปุ่ม/checkbox */
-    justify-content: center;
-    /* จัดให้อยู่กึ่งกลาง */
-    align-items: center;
-    /* จัดให้อยู่กึ่งกลางในแนวตั้ง */
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #f0f0f0;
-    /* สีพื้นหลังอ่อนๆ */
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.checkbox-control {
-    display: flex;
-    align-items: center;
-    /* จัดให้ข้อความและ checkbox อยู่ในแนวเดียวกัน */
-    gap: 8px;
-    /* ระยะห่างระหว่าง checkbox กับ label */
-    font-size: 1.1em;
-    /* ขนาดฟอนต์สำหรับข้อความ */
-    color: #333;
-    user-select: none;
-    /* ป้องกันการเลือกข้อความ */
-}
-
-.checkbox-control input[type="checkbox"] {
-    /* ปรับขนาดของ checkbox */
-    width: 20px;
-    height: 20px;
-    /* เปลี่ยนรูปลักษณ์ของ checkbox (อาจต้องใช้ -webkit-appearance สำหรับการปรับแต่งเพิ่มเติมในบางเบราว์เซอร์) */
-    appearance: none;
-    -webkit-appearance: none;
-    border: 2px solid #555;
-    border-radius: 4px;
-    background-color: #fff;
-    cursor: pointer;
-    position: relative;
-    top: 2px;
-    /* ปรับตำแหน่งเล็กน้อยหากจำเป็น */
-}
-
-
-/* เมื่อ checkbox ถูกเลือก */
-
-.checkbox-control input[type="checkbox"]:checked {
-    background-color: #4CAF50;
-    /* สีเขียวเมื่อเลือก */
-    border-color: #4CAF50;
-}
-
-
-/* สร้างเครื่องหมายถูก */
-
-.checkbox-control input[type="checkbox"]:checked::after {
-    content: '✔';
-    /* ใช้เครื่องหมายถูก unicode */
-    font-size: 14px;
-    color: #fff;
+#settings-container {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    line-height: 1;
-    /* ปรับ line-height เพื่อจัดกึ่งกลาง */
+    top: 15px;
+    right: 0%;
+    z-index: 100;
 }
 
-.checkbox-control label {
+body.dark-mode #settings-btn {
+    background-color: transparent;
+    padding: 8px 15px;
+    color: white;
+}
+
+#settings-btn {
+    background-color: transparent;
+    padding: 8px 15px;
+    color: rgb(20, 20, 20);
+}
+
+#settings-btn:hover {
+    background-color: var(--secondary-btn-hover);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-content {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #888;
     cursor: pointer;
-    /* ทำให้คลิกที่ข้อความก็เลือก checkbox ได้ */
+}
+
+.modal-close:hover {
+    color: var(--text-color);
+}
+
+.modal-body .setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    flex-wrap: wrap;
+}
+
+.modal-body .setting-item>span {
+    font-size: 1.1rem;
+    margin-right: 15px;
+}
+
+#theme-btn-group .theme-btn {
+    background-color: var(--secondary-btn-bg);
+}
+
+#theme-btn-group .theme-btn:hover {
+    background-color: var(--secondary-btn-hover);
+}
+
+#theme-btn-group .theme-btn.active {
+    background-color: var(--primary-btn-bg);
+    font-weight: bold;
+    box-shadow: inset 0 0 0 2px var(--primary-btn-hover);
+}
+
+#game-mode-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+input[type="radio"] {
+    accent-color: var(--primary-btn-bg);
+    width: 16px;
+    height: 16px;
+}
+
+
+/* --- Dark Mode --- */
+
+body.dark-mode {
+    --bg-color: #121212;
+    --table-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --card-back-bg: #2a2a2a;
+    --card-back-text: #e0e0e0;
+    --border-color: #444;
+}
+
+body.dark-mode #periodic-table {
+    border-color: #333;
+}
+
+body.dark-mode .element {
+    color: #212529;
+}
+
+
+/* Keep text on elements readable */
+
+body.dark-mode #settings-btn:hover {
+    background-color: #444;
+}
+
+#custom-groups-btn {
+    background-color: #ffc107;
+    /* A different color to stand out */
+    color: #212529;
+}
+
+#custom-groups-btn:hover {
+    background-color: #e0a800;
+}
+
+
+/* Custom Groups List in Modal */
+
+#custom-groups-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#custom-groups-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#custom-groups-list li:last-child {
+    border-bottom: none;
+}
+
+#custom-groups-list .group-name {
+    font-weight: 500;
+}
+
+#custom-groups-list .group-actions button {
+    margin-left: 8px;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+
+.use-group-btn {
+    background-color: var(--primary-btn-bg);
+}
+
+.use-group-btn:hover {
+    background-color: var(--primary-btn-hover);
+}
+
+.delete-group-btn {
+    background-color: #dc3545;
+    /* Red for delete */
+}
+
+.delete-group-btn:hover {
+    background-color: #c82333;
+}
+
+#custom-groups-controls {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#create-new-group-btn {
+    background-color: var(--secondary-btn-bg);
+    width: 100%;
+    padding: 12px;
+}
+
+#create-new-group-btn:hover {
+    background-color: var(--secondary-btn-hover);
+}
+
+
+/* Save Group Modal */
+
+#save-group-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#new-group-name-input {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--table-bg);
+    color: var(--text-color);
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+}
+
+#save-new-group-btn {
+    background-color: var(--primary-btn-bg);
+    padding: 12px;
+}
+
+#save-new-group-btn:hover {
+    background-color: var(--primary-btn-hover);
+}
+
+
+/* ===== NEW STYLES for Fill-in-the-blanks Game ===== */
+
+
+/* --- Game Choice Modal --- */
+
+#game-choice-buttons {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px 0;
+    gap: 10px;
+}
+
+#game-choice-buttons button {
+    padding: 15px;
+    font-size: 1.1rem;
+    width: 48%;
+    background-color: var(--primary-btn-bg);
+}
+
+#game-choice-buttons button:hover {
+    background-color: var(--primary-btn-hover);
+}
+
+
+/* --- Fill in the Blanks Game Screen --- */
+
+#element-bank-container {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: var(--table-bg);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#element-bank {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px;
+    /* Ensure it has a height */
+}
+
+
+/* Style for the element the user needs to place */
+
+.draggable-element {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 5px 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7rem;
+    width: 80px;
+    /* Fixed size for consistency */
+    height: 80px;
+    cursor: grab;
+    transition: all 0.2s ease-in-out;
+}
+
+.draggable-element:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.draggable-element .symbol {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.draggable-element .atomic-number {
+    align-self: flex-start;
+    padding-left: 4px;
+    font-size: 0.8rem;
+}
+
+
+/* Container for the empty grid */
+
+#fill-periodic-table-container {
+    overflow-x: auto;
+    padding-bottom: 15px;
+}
+
+
+/* The empty grid itself */
+
+#fill-periodic-table {
+    display: grid;
+    grid-template-columns: repeat(18, minmax(60px, 1fr));
+    grid-auto-rows: minmax(60px, 1fr);
+    gap: 5px;
+    padding: 10px;
+    background-color: var(--table-bg);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 1200px;
+}
+
+
+/* Individual empty cells in the grid */
+
+.placeholder-element {
+    border: 2px dashed var(--border-color);
+    border-radius: 4px;
+    transition: background-color 0.2s, border-style 0.2s;
+    min-height: 60px;
+    /* ensure placeholders have a size */
+    display: flex;
+    /* To center dropped elements */
+    justify-content: center;
+    align-items: center;
+}
+
+.placeholder-element.drag-over {
+    background-color: var(--primary-btn-hover);
+    border-style: solid;
+}
+
+
+/* The element once it's been dropped */
+
+.placeholder-element .element {
+    margin: 0;
+    /* Override default margin */
+    width: 100%;
+    height: 100%;
+    cursor: default;
+    /* No pointer cursor once dropped */
+}
+
+.placeholder-element .element:hover {
+    transform: none;
+    /* No hover effect once dropped */
+}
+
+
+/* Styles for feedback after checking answers */
+
+.correct-placement {
+    border: 3px solid #28a745 !important;
+    /* Green for correct */
+    background-color: #d4edda;
+}
+
+.incorrect-placement {
+    border: 3px solid #dc3545 !important;
+    /* Red for incorrect */
+    background-color: #f8d7da;
+    position: relative;
+    /* For positioning the correction hint */
+}
+
+
+/* Hint showing the correct symbol on an incorrect placement */
+
+.incorrect-placement::after {
+    content: attr(data-correct-symbol);
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffc107;
+    color: #333;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    z-index: 20;
+    white-space: nowrap;
+}
+
+#fill-game-controls {
+    margin-top: 30px;
+}
+
+#check-answers-btn,
+#fill-back-to-selection-btn {
+    background-color: var(--secondary-btn-bg);
+}
+
+#check-answers-btn:hover,
+#fill-back-to-selection-btn:hover {
+    background-color: var(--secondary-btn-hover);
 }
 
 
@@ -376,6 +762,12 @@ button {
     }
     h1 {
         font-size: 1.8rem;
+    }
+    .card-front-name {
+        font-size: 2rem;
+    }
+    .card-front-symbol {
+        font-size: 4rem;
     }
     #periodic-table {
         min-width: 900px;
