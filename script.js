@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ... (ส่วน const elements = [...] และ const categories = {...} เหมือนเดิม)
+    // Periodic Table Elements (118) ---
     const elements = [
         // Group 1: Alkali Metals (and Hydrogen)
         { "number": 1, "symbol": "H", "name": "ไฮโดรเจน", "mass": 1.008, "category": "diatomic-nonmetal", "y": 1, "x": 1 },
@@ -164,135 +164,90 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- DOM Element References ---
-    // ... (DOM elements เดิมทั้งหมด) ...
-    const selectionScreen = document.getElementById('selection-screen');
-    const gameScreen = document.getElementById('game-screen');
     const periodicTable = document.getElementById('periodic-table');
     const legendContainer = document.getElementById('legend');
+    const selectionScreen = document.getElementById('selection-screen');
+    const gameScreen = document.getElementById('game-screen');
     const startGameBtn = document.getElementById('start-game-btn');
     const selectAllBtn = document.getElementById('select-all-btn');
     const deselectAllBtn = document.getElementById('deselect-all-btn');
-    const selectMainGroupsBtn = document.getElementById('select-main-groups-btn');
-    const randomOrderCheckbox = document.getElementById('random-order-checkbox');
     const flashcard = document.getElementById('flashcard');
     const cardFront = document.getElementById('card-front');
     const cardBack = document.getElementById('card-back');
     const flipCardBtn = document.getElementById('flip-card-btn');
     const nextCardBtn = document.getElementById('next-card-btn');
     const backToSelectionBtn = document.getElementById('back-to-selection-btn');
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsModal = document.getElementById('settings-modal');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-    const lightModeBtn = document.getElementById('light-mode-btn');
-    const darkModeBtn = document.getElementById('dark-mode-btn');
-    const gameModeRadios = document.querySelectorAll('input[name="game-mode"]');
-    const gameChoiceModal = document.getElementById('game-choice-modal');
-    const closeChoiceModalBtn = document.getElementById('close-choice-modal-btn');
-    const startFlashcardGameBtn = document.getElementById('start-flashcard-game-btn');
-    const startFillGameBtn = document.getElementById('start-fill-game-btn');
-    const fillGameScreen = document.getElementById('fill-game-screen');
-    const elementBank = document.getElementById('element-bank');
-    const fillPeriodicTable = document.getElementById('fill-periodic-table');
-    const checkAnswersBtn = document.getElementById('check-answers-btn');
-    const fillBackToSelectionBtn = document.getElementById('fill-back-to-selection-btn');
+    const selectMainGroupsBtn = document.getElementById('select-main-groups-btn');
+    const randomOrderCheckbox = document.getElementById('random-order-checkbox');
 
-    // --- NEW: Custom Groups Elements ---
-    const customGroupsBtn = document.getElementById('custom-groups-btn');
-    const customGroupsModal = document.getElementById('custom-groups-modal');
-    const closeCustomGroupsModalBtn = document.getElementById('close-custom-groups-modal-btn');
-    const customGroupsList = document.getElementById('custom-groups-list');
-    const createNewGroupBtn = document.getElementById('create-new-group-btn');
-    const saveGroupModal = document.getElementById('save-group-modal');
-    const closeSaveGroupModalBtn = document.getElementById('close-save-group-modal-btn');
-    const newGroupNameInput = document.getElementById('new-group-name-input');
-    const saveNewGroupBtn = document.getElementById('save-new-group-btn');
-
-    // ===== STATE =====
-    // ... (State เดิมทั้งหมด)
     let selectedElementsData = [];
     let currentCardIndex = 0;
-    let fillGameElements = [];
-    let currentFillElementIndex = 0;
-    let placedElements = {};
 
-    // --- NEW State for group creation ---
-    let isCreatingGroup = false;
-
-    // ... (โค้ดฟังก์ชันเดิมทั้งหมด ตั้งแต่ SETTINGS LOGIC จนถึง GAME LOGIC)
-    // ===== SETTINGS LOGIC =====
-    const setTheme = (theme) => {
-        document.body.className = `${theme}-mode`;
-        lightModeBtn.classList.toggle('active', theme === 'light');
-        darkModeBtn.classList.toggle('active', theme === 'dark');
-        localStorage.setItem('theme', theme);
-    };
-
-    const setGameMode = (mode) => {
-        document.querySelector(`input[name="game-mode"][value="${mode}"]`).checked = true;
-        localStorage.setItem('gameMode', mode);
-    };
-
-    settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
-    closeModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
-    settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.add('hidden'); });
-    lightModeBtn.addEventListener('click', () => setTheme('light'));
-    darkModeBtn.addEventListener('click', () => setTheme('dark'));
-    gameModeRadios.forEach(radio => radio.addEventListener('change', (e) => setGameMode(e.target.value)));
-
-    // ===== SETUP LOGIC =====
-    const createPeriodicTable = () => {
+    // --- Phase 1: Create and Display the Periodic Table & Legend ---
+    function createPeriodicTable() {
         elements.forEach(el => {
-            const elDiv = document.createElement('div');
-            elDiv.className = `element ${el.category}`;
-            elDiv.style.gridRow = el.y;
-            elDiv.style.gridColumn = el.x;
-            elDiv.dataset.number = el.number;
-            elDiv.innerHTML = `<div class="atomic-number">${el.number}</div><div class="symbol">${el.symbol}</div><div class="name">${el.name}</div>`;
-            elDiv.addEventListener('click', () => elDiv.classList.toggle('selected'));
-            periodicTable.appendChild(elDiv);
+            const elementDiv = document.createElement('div');
+            // Add multiple classes: 'element' and the category name
+            elementDiv.classList.add('element', el.category);
+            elementDiv.style.gridColumnStart = el.x;
+            elementDiv.style.gridRowStart = el.y;
+            elementDiv.dataset.number = el.number;
+            elementDiv.innerHTML = `
+                <div class="atomic-number">${el.number}</div>
+                <div class="symbol">${el.symbol}</div>
+                <div class="name">${el.name}</div>
+            `;
+            elementDiv.addEventListener('click', () => {
+                elementDiv.classList.toggle('selected');
+            });
+            periodicTable.appendChild(elementDiv);
         });
-    };
+    }
 
-    const createLegend = () => {
-        Object.entries(categories).forEach(([key, value]) => {
-            if (!document.querySelector(`.legend-item .${key}`)) {
-                const legendItem = document.createElement('div');
-                legendItem.className = 'legend-item';
-                legendItem.innerHTML = `<div class="legend-color-box ${key}"></div><span>${value}</span>`;
-                legendContainer.appendChild(legendItem);
-            }
-        });
-    };
+    function createLegend() {
+        for (const category in categories) {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.innerHTML = `
+                <div class="legend-color-box ${category}"></div>
+                <span>${categories[category]}</span>
+            `;
+            legendContainer.appendChild(legendItem);
+        }
+    }
 
-    // ===== GAME LOGIC =====
-    const prepareGame = () => {
+
+    // --- Phase 2: Game Logic ---
+
+    function startGame() {
         const selectedDivs = document.querySelectorAll('.element.selected');
         if (selectedDivs.length === 0) {
-            alert('กรุณาเลือกธาตุอย่างน้อย 1 ธาตุ!');
+            alert('กรุณาเลือกธาตุอย่างน้อย 1 ธาตุเพื่อเริ่มเกม!');
             return;
         }
 
-        const commonSelectedData = Array.from(selectedDivs).map(div =>
-            elements.find(el => el.number == div.dataset.number)
-        );
-        selectedElementsData = [...commonSelectedData];
-        fillGameElements = [...commonSelectedData];
+        selectedElementsData = Array.from(selectedDivs).map(div => {
+            const elementNumber = parseInt(div.dataset.number);
+            return elements.find(el => el.number === elementNumber);
+        });
 
-        gameChoiceModal.classList.remove('hidden');
-    };
-
-    const startFlashcardGame = () => {
+        // Shuffle the selected elements using Fisher-Yates algorithm
         if (randomOrderCheckbox.checked) {
-            selectedElementsData.sort(() => Math.random() - 0.5);
+            for (let i = selectedElementsData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [selectedElementsData[i], selectedElementsData[j]] = [selectedElementsData[j], selectedElementsData[i]];
+            }
         }
+
         currentCardIndex = 0;
         selectionScreen.classList.add('hidden');
         gameScreen.classList.remove('hidden');
         displayCard();
-    };
+    }
 
-    const displayCard = () => {
+    function displayCard() {
         if (currentCardIndex >= selectedElementsData.length) {
+            // Game Over
             cardFront.innerHTML = `<div class="card-front-symbol">🎉</div>`;
             cardBack.innerHTML = `<h2>จบเกมแล้ว!</h2><p>คุณทบทวนครบ ${selectedElementsData.length} ธาตุ</p>`;
             nextCardBtn.disabled = true;
@@ -306,359 +261,65 @@ document.addEventListener('DOMContentLoaded', () => {
         nextCardBtn.disabled = false;
         flipCardBtn.disabled = false;
 
-        const gameMode = localStorage.getItem('gameMode') || 'symbol-to-name';
-        const backContent = `<h2>${currentElement.name} (${currentElement.symbol})</h2><p><strong>เลขอะตอม:</strong> ${currentElement.number}</p><p><strong>มวลอะตอม:</strong> ${currentElement.mass.toFixed(3)}</p><p><strong>ประเภท:</strong> ${categories[currentElement.category]}</p>`;
+        cardFront.innerHTML = `<div class="card-front-symbol">${currentElement.symbol}</div>`;
 
-        if (gameMode === 'name-to-symbol') {
-            cardFront.innerHTML = `<div class="card-front-name">${currentElement.name}</div>`;
-        } else {
-            cardFront.innerHTML = `<div class="card-front-symbol">${currentElement.symbol}</div>`;
-        }
-        cardBack.innerHTML = backContent;
-    };
+        cardBack.innerHTML = `
+            <h2>${currentElement.name} (${currentElement.symbol})</h2>
+            <p><strong>เลขอะตอม:</strong> ${currentElement.number}</p>
+            <p><strong>มวลอะตอม:</strong> ${currentElement.mass}</p>
+            <p><strong>ประเภท:</strong> ${categories[currentElement.category] || 'N/A'}</p>
+        `;
+    }
 
-    const backToSelectionFromFlashcard = () => {
+    function flipCard() {
+        flashcard.classList.toggle('flipped');
+    }
+
+    function nextCard() {
+        currentCardIndex++;
+        displayCard();
+    }
+
+    function backToSelection() {
         gameScreen.classList.add('hidden');
         selectionScreen.classList.remove('hidden');
-    };
+    }
 
-    // ===== Fill-in-the-blanks Game Logic (with Movable Elements) =====
+    // --- Event Listeners ---
+    startGameBtn.addEventListener('click', startGame);
+    flipCardBtn.addEventListener('click', flipCard);
+    nextCardBtn.addEventListener('click', nextCard);
+    backToSelectionBtn.addEventListener('click', backToSelection);
 
-    const startFillTheBlanksGame = () => {
-        selectionScreen.classList.add('hidden');
-        fillGameScreen.classList.remove('hidden');
-        placedElements = {};
-        currentFillElementIndex = 0;
-        checkAnswersBtn.disabled = false;
-        elementBank.innerHTML = '';
-        if (randomOrderCheckbox.checked) {
-            fillGameElements.sort(() => Math.random() - 0.5);
-        }
-        createEmptyGrid();
-        displayNextFillElement();
-    };
-
-    const makeElementInGridDraggable = (elementDiv) => {
-        elementDiv.draggable = true;
-        elementDiv.addEventListener('dragstart', (e) => {
-            e.stopPropagation();
-            const elementNumber = elementDiv.dataset.number;
-            const parentPlaceholder = elementDiv.parentElement;
-            e.dataTransfer.setData('text/plain', elementNumber);
-            e.dataTransfer.setData('source', 'grid');
-            e.dataTransfer.setData('origin-x', parentPlaceholder.dataset.x);
-            e.dataTransfer.setData('origin-y', parentPlaceholder.dataset.y);
-            setTimeout(() => { elementDiv.style.visibility = 'hidden'; }, 0);
-        });
-        elementDiv.addEventListener('dragend', () => {
-            elementDiv.style.visibility = 'visible';
-        });
-    };
-
-    const createEmptyGrid = () => {
-        fillPeriodicTable.innerHTML = '';
-        for (let y = 1; y <= 10; y++) {
-            for (let x = 1; x <= 18; x++) {
-                if (elements.some(el => el.x === x && el.y === y)) {
-                    const placeholder = document.createElement('div');
-                    placeholder.className = 'placeholder-element';
-                    placeholder.dataset.x = x;
-                    placeholder.dataset.y = y;
-                    placeholder.style.gridColumn = x;
-                    placeholder.style.gridRow = y;
-                    placeholder.addEventListener('dragover', e => { e.preventDefault();
-                        placeholder.classList.add('drag-over'); });
-                    placeholder.addEventListener('dragleave', () => placeholder.classList.remove('drag-over'));
-                    placeholder.addEventListener('drop', handleDrop);
-                    fillPeriodicTable.appendChild(placeholder);
-                }
-            }
-        }
-    };
-
-    const displayNextFillElement = () => {
-        elementBank.innerHTML = '';
-        if (currentFillElementIndex >= fillGameElements.length) {
-            elementBank.innerHTML = '<p>วางธาตุทั้งหมดแล้ว! กด "ตรวจคำตอบ" ได้เลย</p>';
-            return;
-        }
-        const elementToPlace = fillGameElements[currentFillElementIndex];
-        const draggableDiv = document.createElement('div');
-        draggableDiv.className = `draggable-element element ${elementToPlace.category}`;
-        draggableDiv.draggable = true;
-        draggableDiv.dataset.number = elementToPlace.number;
-        draggableDiv.innerHTML = `<div class="atomic-number">${elementToPlace.number}</div><div class="symbol">${elementToPlace.symbol}</div><div class="name">${elementToPlace.name}</div>`;
-        draggableDiv.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', elementToPlace.number);
-            e.dataTransfer.setData('source', 'bank'); // Source is the bank
-            setTimeout(() => { draggableDiv.style.visibility = 'hidden'; }, 0);
-        });
-        draggableDiv.addEventListener('dragend', () => { draggableDiv.style.visibility = 'visible'; });
-        elementBank.appendChild(draggableDiv);
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const targetPlaceholder = e.currentTarget;
-        targetPlaceholder.classList.remove('drag-over');
-
-        const source = e.dataTransfer.getData('source');
-
-        if (targetPlaceholder.childElementCount > 0) {
-            if (source === 'grid') {
-                const originX = e.dataTransfer.getData('origin-x');
-                const originY = e.dataTransfer.getData('origin-y');
-                if (targetPlaceholder.dataset.x === originX && targetPlaceholder.dataset.y === originY) {
-                    return;
-                }
-            }
-            return;
-        }
-
-        const elementNumber = e.dataTransfer.getData('text/plain');
-        const droppedElementData = elements.find(el => el.number == elementNumber);
-
-        const droppedElementDiv = document.createElement('div');
-        droppedElementDiv.className = `element ${droppedElementData.category}`;
-        droppedElementDiv.dataset.number = droppedElementData.number;
-        droppedElementDiv.innerHTML = `<div class="atomic-number">${droppedElementData.number}</div><div class="symbol">${droppedElementData.symbol}</div>`;
-
-        makeElementInGridDraggable(droppedElementDiv);
-        targetPlaceholder.appendChild(droppedElementDiv);
-
-        if (source === 'grid') {
-            const originX = e.dataTransfer.getData('origin-x');
-            const originY = e.dataTransfer.getData('origin-y');
-            const originPlaceholder = document.querySelector(`.placeholder-element[data-x='${originX}'][data-y='${originY}']`);
-            if (originPlaceholder) {
-                originPlaceholder.innerHTML = '';
-                delete placedElements[`${originX}-${originY}`];
-            }
-        }
-
-        placedElements[`${targetPlaceholder.dataset.x}-${targetPlaceholder.dataset.y}`] = droppedElementData.number;
-
-        if (source === 'bank') {
-            currentFillElementIndex++;
-            displayNextFillElement();
-        }
-    };
-
-    const checkAnswers = () => {
-        document.querySelectorAll('.placeholder-element').forEach(p => {
-            p.classList.remove('correct-placement', 'incorrect-placement');
-            p.removeAttribute('data-correct-symbol');
-        });
-        let allCorrect = true;
-        document.querySelectorAll('.placeholder-element:has(.element)').forEach(placeholder => {
-            const droppedElementNumber = placeholder.querySelector('.element').dataset.number;
-            const correctElement = elements.find(el => el.number == droppedElementNumber);
-            const placedX = parseInt(placeholder.dataset.x);
-            const placedY = parseInt(placeholder.dataset.y);
-            if (correctElement.x === placedX && correctElement.y === placedY) {
-                placeholder.classList.add('correct-placement');
-            } else {
-                allCorrect = false;
-                placeholder.classList.add('incorrect-placement');
-                const elementThatShouldBeHere = elements.find(el => el.x === placedX && el.y === placedY);
-                placeholder.dataset.correctSymbol = elementThatShouldBeHere ? `ควรเป็น ${elementThatShouldBeHere.symbol}` : 'ช่องนี้ว่าง';
-            }
-        });
-
-        if (Object.keys(placedElements).length < fillGameElements.length) {
-            alert('คุณยังวางธาตุไม่ครบทุกตัว');
-            return;
-        }
-
-        if (allCorrect) {
-            elementBank.innerHTML = '<h2>เก่งมาก! ถูกต้องทั้งหมด! 🎉</h2>';
-        } else {
-            elementBank.innerHTML = '<h3>ผลลัพธ์: สีเขียวคือถูกต้อง, สีแดงคือผิด (พร้อมคำใบ้)</h3>';
-        }
-        checkAnswersBtn.disabled = true;
-    };
-
-    const backToSelectionFromFill = () => {
-        fillGameScreen.classList.add('hidden');
-        selectionScreen.classList.remove('hidden');
-    };
-
-
-    // ===== NEW: Custom Groups Logic =====
-    const STORAGE_KEY = 'customElementGroups';
-
-    const getCustomGroups = () => {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    };
-
-    const saveCustomGroups = (groups) => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(groups));
-    };
-
-    const populateCustomGroupsModal = () => {
-        const groups = getCustomGroups();
-        customGroupsList.innerHTML = ''; // Clear existing list
-
-        if (groups.length === 0) {
-            customGroupsList.innerHTML = '<li>ยังไม่มีกลุ่มที่บันทึกไว้</li>';
-            return;
-        }
-
-        groups.forEach(group => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span class="group-name">${group.name}</span>
-                <div class="group-actions">
-                    <button class="use-group-btn" data-group-name="${group.name}">ใช้กลุ่มนี้</button>
-                    <button class="delete-group-btn" data-group-name="${group.name}">ลบ</button>
-                </div>
-            `;
-            customGroupsList.appendChild(li);
-        });
-    };
-
-    const enterGroupCreationMode = () => {
-        isCreatingGroup = true;
-        customGroupsModal.classList.add('hidden');
-        saveGroupModal.classList.add('hidden');
-        // Clear all selections and prompt user
-        document.querySelectorAll('.element.selected').forEach(el => el.classList.remove('selected'));
-        // Temporarily change the start button to a save button
-        startGameBtn.textContent = 'บันทึกกลุ่มที่เลือก';
-        alert('กรุณาเลือกธาตุที่ต้องการสำหรับกลุ่มใหม่ จากนั้นกดปุ่ม "บันทึกกลุ่มที่เลือก"');
-    };
-
-    const exitGroupCreationMode = () => {
-        isCreatingGroup = false;
-        startGameBtn.textContent = '▶️ เริ่มเกม';
-    };
-
-    customGroupsBtn.addEventListener('click', () => {
-        if (isCreatingGroup) {
-            // If already in creation mode, this button acts as a cancel
-            exitGroupCreationMode();
-            alert('ยกเลิกการสร้างกลุ่มแล้ว');
-            return;
-        }
-        const groups = getCustomGroups();
-        if (groups.length === 0) {
-            // If no groups exist, go straight to creation
-            enterGroupCreationMode();
-        } else {
-            // Otherwise, show the management modal
-            populateCustomGroupsModal();
-            customGroupsModal.classList.remove('hidden');
-        }
+    selectAllBtn.addEventListener('click', () => {
+        document.querySelectorAll('.element').forEach(el => el.classList.add('selected'));
     });
 
-    createNewGroupBtn.addEventListener('click', enterGroupCreationMode);
-
-    // Override startGameBtn listener when in creation mode
-    startGameBtn.addEventListener('click', (e) => {
-        if (isCreatingGroup) {
-            e.stopImmediatePropagation(); // Prevent normal game start
-            const selectedDivs = document.querySelectorAll('.element.selected');
-            if (selectedDivs.length === 0) {
-                alert('กรุณาเลือกธาตุอย่างน้อย 1 ธาตุเพื่อสร้างกลุ่ม');
-                return;
-            }
-            // Show modal to name the group
-            newGroupNameInput.value = '';
-            saveGroupModal.classList.remove('hidden');
-        } else {
-            // Normal behavior
-            prepareGame();
-        }
-    }, true); // Use capture phase to ensure this runs first
-
-    saveNewGroupBtn.addEventListener('click', () => {
-        const groupName = newGroupNameInput.value.trim();
-        if (!groupName) {
-            alert('กรุณาตั้งชื่อกลุ่ม');
-            return;
-        }
-
-        const selectedElements = Array.from(document.querySelectorAll('.element.selected')).map(el => parseInt(el.dataset.number));
-        const newGroup = { name: groupName, elements: selectedElements };
-
-        const groups = getCustomGroups();
-        groups.push(newGroup);
-        saveCustomGroups(groups);
-
-        alert(`บันทึกกลุ่ม "${groupName}" เรียบร้อยแล้ว!`);
-        saveGroupModal.classList.add('hidden');
-        exitGroupCreationMode();
+    deselectAllBtn.addEventListener('click', () => {
+        document.querySelectorAll('.element').forEach(el => el.classList.remove('selected'));
     });
 
-    customGroupsList.addEventListener('click', (e) => {
-        const groupName = e.target.dataset.groupName;
-        if (!groupName) return;
-
-        if (e.target.classList.contains('use-group-btn')) {
-            const groups = getCustomGroups();
-            const groupToUse = groups.find(g => g.name === groupName);
-            if (groupToUse) {
-                // Deselect all
-                document.querySelectorAll('.element.selected').forEach(el => el.classList.remove('selected'));
-                // Select elements from the group
-                groupToUse.elements.forEach(num => {
-                    const elDiv = document.querySelector(`.element[data-number='${num}']`);
-                    if (elDiv) elDiv.classList.add('selected');
-                });
-                customGroupsModal.classList.add('hidden');
-            }
-        } else if (e.target.classList.contains('delete-group-btn')) {
-            if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่ม "${groupName}"?`)) {
-                let groups = getCustomGroups();
-                groups = groups.filter(g => g.name !== groupName);
-                saveCustomGroups(groups);
-                // Refresh the list in the modal
-                populateCustomGroupsModal();
-            }
-        }
-    });
-
-
-    // ===== EVENT LISTENERS =====
-    // Close Modals
-    closeCustomGroupsModalBtn.addEventListener('click', () => customGroupsModal.classList.add('hidden'));
-    closeSaveGroupModalBtn.addEventListener('click', () => saveGroupModal.classList.add('hidden'));
-
-    // ... (Event Listeners เดิมทั้งหมด)
-    flipCardBtn.addEventListener('click', () => flashcard.classList.toggle('flipped'));
-    nextCardBtn.addEventListener('click', () => { currentCardIndex++;
-        displayCard(); });
-    backToSelectionBtn.addEventListener('click', backToSelectionFromFlashcard);
-    selectAllBtn.addEventListener('click', () => document.querySelectorAll('.element').forEach(el => el.classList.add('selected')));
-    deselectAllBtn.addEventListener('click', () => document.querySelectorAll('.element').forEach(el => el.classList.remove('selected')));
     selectMainGroupsBtn.addEventListener('click', () => {
-        document.querySelectorAll('.element.selected').forEach(el => el.classList.remove('selected'));
-        document.querySelectorAll('.element').forEach(el => {
-            const col = parseInt(el.style.gridColumn);
-            if (col === 1 || col === 2 || (col >= 13 && col <= 18) && (parseInt(el.style.gridRow) < 7)) {
-                el.classList.add('selected');
+        // ขั้นแรก ยกเลิกการเลือกธาตุทั้งหมด
+        document.querySelectorAll('.element').forEach(el => el.classList.remove('selected'));
+
+        // จากนั้น เลือกธาตุในกลุ่มหลัก
+        elements.forEach(el => {
+            // กลุ่มหลักโดยทั่วไปคือ 1, 2 และ 13-18
+            // และต้องแน่ใจว่าไม่ใช่แลนทาไนด์/แอกทิไนด์ (ตำแหน่ง y คือ 9 และ 10 ในข้อมูลของคุณ)
+            if (([1, 2].includes(el.x) && el.y < 8 || (el.x >= 13 && el.x <= 18 && el.y < 7))) {
+                const elDiv = document.querySelector(`.element[data-number="${el.number}"]`);
+                if (elDiv) { // ตรวจสอบให้แน่ใจว่า elDiv ไม่เป็น null
+                    elDiv.classList.add('selected');
+                }
             }
         });
+        updateStartGameButtonState(); // เพิ่มการเรียกใช้ฟังก์ชันนี้
     });
-    closeChoiceModalBtn.addEventListener('click', () => gameChoiceModal.classList.add('hidden'));
-    gameChoiceModal.addEventListener('click', (e) => { if (e.target === gameChoiceModal) gameChoiceModal.classList.add('hidden'); });
-    startFlashcardGameBtn.addEventListener('click', () => { gameChoiceModal.classList.add('hidden');
-        startFlashcardGame(); });
-    startFillGameBtn.addEventListener('click', () => { gameChoiceModal.classList.add('hidden');
-        startFillTheBlanksGame(); });
-    checkAnswersBtn.addEventListener('click', checkAnswers);
-    fillBackToSelectionBtn.addEventListener('click', backToSelectionFromFill);
 
-    // ===== INITIALIZATION =====
-    const initializeApp = () => {
-        createPeriodicTable();
-        createLegend();
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        const savedGameMode = localStorage.getItem('gameMode') || 'symbol-to-name';
-        setTheme(savedTheme);
-        setGameMode(savedGameMode);
-    };
 
-    initializeApp();
+
+    // --- Initial Calls ---
+    createPeriodicTable();
+    createLegend();
 });

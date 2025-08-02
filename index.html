@@ -13,21 +13,16 @@
 
 <body>
 
-    <div id="settings-container">
-        <button id="settings-btn">⚙️ ตั้งค่า</button>
-    </div>
-
     <div id="selection-screen">
-        <h1 class="instruction">เลือกธาตุเพื่อสร้าง Flashcard 🧪</h1>
+        <h1>เลือกธาตุเพื่อสร้าง Flashcard 🧪</h1>
         <p>คลิกบนธาตุที่ต้องการในตารางด้านล่าง จากนั้นกด "เริ่มเกม"</p>
         <div id="controls">
             <button id="select-all-btn">เลือกทั้งหมด</button>
             <button id="select-main-groups-btn">เลือก 8 หมู่หลัก</button>
-            <button id="custom-groups-btn">กำหนดเอง</button>
             <button id="deselect-all-btn">ยกเลิกทั้งหมด</button>
             <div class="checkbox-control">
                 <input type="checkbox" id="random-order-checkbox" checked>
-                <label class="instruction" for="random-order-checkbox">สุ่มลำดับการ์ด</label>
+                <label for="random-order-checkbox">สุ่มลำดับการ์ด</label>
             </div>
             <button id="start-game-btn">▶️ เริ่มเกม</button>
         </div>
@@ -36,15 +31,19 @@
             <div id="periodic-table"></div>
         </div>
 
-        <div id="legend"></div>
+        <div id="legend">
+        </div>
+
     </div>
 
     <div id="game-screen" class="hidden">
         <h1>Flashcard สุ่มธาตุ</h1>
         <div class="flashcard-container">
             <div class="flashcard" id="flashcard">
-                <div class="card-face card-front" id="card-front"></div>
-                <div class="card-face card-back" id="card-back"></div>
+                <div class="card-face card-front" id="card-front">
+                </div>
+                <div class="card-face card-back" id="card-back">
+                </div>
             </div>
         </div>
         <div id="game-controls">
@@ -53,97 +52,6 @@
             <button id="back-to-selection-btn">กลับไปหน้าเลือกธาตุ</button>
         </div>
     </div>
-
-    <div id="fill-game-screen" class="hidden">
-        <h1>เติมธาตุในตารางให้ถูกต้อง</h1>
-        <p>ลากธาตุด้านล่างไปวางในตำแหน่งที่ถูกต้องบนตารางธาตุ</p>
-        <div id="element-bank-container">
-            <h3>ธาตุที่จะวาง:</h3>
-            <div id="element-bank"></div>
-        </div>
-        <div id="fill-periodic-table-container">
-            <div id="fill-periodic-table"></div>
-        </div>
-        <div id="fill-game-controls">
-            <button id="check-answers-btn">ตรวจคำตอบ</button>
-            <button id="fill-back-to-selection-btn">กลับไปหน้าเลือกธาตุ</button>
-        </div>
-    </div>
-
-    <div id="settings-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>ตั้งค่า</h2>
-                <button id="close-modal-btn" class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="setting-item">
-                    <span>ธีม</span>
-                    <div id="theme-btn-group">
-                        <button id="light-mode-btn" class="theme-btn">สว่าง</button>
-                        <button id="dark-mode-btn" class="theme-btn">มืด</button>
-                    </div>
-                </div>
-                <div class="setting-item">
-                    <span>รูปแบบเกม</span>
-                    <div id="game-mode-group">
-                        <label class="radio-label">
-                            <input type="radio" name="game-mode" value="symbol-to-name" checked>
-                            <span>สัญลักษณ์ → ชื่อธาตุ</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="game-mode" value="name-to-symbol">
-                            <span>ชื่อธาตุ → สัญลักษณ์</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="game-choice-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>เลือกรูปแบบเกม</h2>
-                <button id="close-choice-modal-btn" class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body" id="game-choice-buttons">
-                <button id="start-flashcard-game-btn">🃏 Flashcard</button>
-                <button id="start-fill-game-btn">📝 เติมธาตุในตาราง</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="custom-groups-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>กลุ่มธาตุที่กำหนดเอง</h2>
-                <button id="close-custom-groups-modal-btn" class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <ul id="custom-groups-list">
-                </ul>
-                <div id="custom-groups-controls">
-                    <button id="create-new-group-btn">สร้างกลุ่มใหม่</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="save-group-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>บันทึกกลุ่มใหม่</h2>
-                <button id="close-save-group-modal-btn" class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>กรุณาตั้งชื่อสำหรับกลุ่มธาตุที่เลือก:</p>
-                <input type="text" id="new-group-name-input" placeholder="เช่น: โลหะที่ใช้บ่อย">
-                <button id="save-new-group-btn">บันทึก</button>
-            </div>
-        </div>
-    </div>
-
 
     <script src="script.js"></script>
 </body>
