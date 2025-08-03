@@ -1,8 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ... (ส่วน const elements = [...] และ const categories = {...} เหมือนเดิม)
     const elements = [
-        // Group 1: Alkali Metals (and Hydrogen)
+        // ... (ข้อมูลธาตุทั้งหมดเหมือนเดิม ไม่มีการเปลี่ยนแปลง) ...
         { "number": 1, "symbol": "H", "name": "ไฮโดรเจน", "mass": 1.008, "category": "diatomic-nonmetal", "y": 1, "x": 1 },
         { "number": 3, "symbol": "Li", "name": "ลิเทียม", "mass": 6.94, "category": "alkali-metal", "y": 2, "x": 1 },
         { "number": 11, "symbol": "Na", "name": "โซเดียม", "mass": 22.990, "category": "alkali-metal", "y": 3, "x": 1 },
@@ -10,56 +9,42 @@ document.addEventListener('DOMContentLoaded', () => {
         { "number": 37, "symbol": "Rb", "name": "รูบิเดียม", "mass": 85.468, "category": "alkali-metal", "y": 5, "x": 1 },
         { "number": 55, "symbol": "Cs", "name": "ซีเซียม", "mass": 132.91, "category": "alkali-metal", "y": 6, "x": 1 },
         { "number": 87, "symbol": "Fr", "name": "แฟรนเซียม", "mass": 223, "category": "alkali-metal", "y": 7, "x": 1 },
-
-        // Group 2: Alkaline Earth Metals
         { "number": 4, "symbol": "Be", "name": "เบริลเลียม", "mass": 9.0122, "category": "alkaline-earth-metal", "y": 2, "x": 2 },
         { "number": 12, "symbol": "Mg", "name": "แมกนีเซียม", "mass": 24.305, "category": "alkaline-earth-metal", "y": 3, "x": 2 },
         { "number": 20, "symbol": "Ca", "name": "แคลเซียม", "mass": 40.078, "category": "alkaline-earth-metal", "y": 4, "x": 2 },
         { "number": 38, "symbol": "Sr", "name": "สตรอนเชียม", "mass": 87.62, "category": "alkaline-earth-metal", "y": 5, "x": 2 },
         { "number": 56, "symbol": "Ba", "name": "แบเรียม", "mass": 137.33, "category": "alkaline-earth-metal", "y": 6, "x": 2 },
         { "number": 88, "symbol": "Ra", "name": "เรเดียม", "mass": 226, "category": "alkaline-earth-metal", "y": 7, "x": 2 },
-
-        // Group 13
         { "number": 5, "symbol": "B", "name": "โบรอน", "mass": 10.81, "category": "metalloid", "y": 2, "x": 13 },
         { "number": 13, "symbol": "Al", "name": "อะลูมิเนียม", "mass": 26.982, "category": "post-transition-metal", "y": 3, "x": 13 },
         { "number": 31, "symbol": "Ga", "name": "แกลเลียม", "mass": 69.723, "category": "post-transition-metal", "y": 4, "x": 13 },
         { "number": 49, "symbol": "In", "name": "อินเดียม", "mass": 114.82, "category": "post-transition-metal", "y": 5, "x": 13 },
         { "number": 81, "symbol": "Tl", "name": "แทลเลียม", "mass": 204.38, "category": "post-transition-metal", "y": 6, "x": 13 },
         { "number": 113, "symbol": "Nh", "name": "นิโฮเนียม", "mass": 286, "category": "post-transition-metal", "y": 7, "x": 13 },
-
-        // Group 14
         { "number": 6, "symbol": "C", "name": "คาร์บอน", "mass": 12.011, "category": "polyatomic-nonmetal", "y": 2, "x": 14 },
         { "number": 14, "symbol": "Si", "name": "ซิลิคอน", "mass": 28.085, "category": "metalloid", "y": 3, "x": 14 },
         { "number": 32, "symbol": "Ge", "name": "เจอร์เมเนียม", "mass": 72.630, "category": "metalloid", "y": 4, "x": 14 },
         { "number": 50, "symbol": "Sn", "name": "ดีบุก", "mass": 118.71, "category": "post-transition-metal", "y": 5, "x": 14 },
         { "number": 82, "symbol": "Pb", "name": "ตะกั่ว", "mass": 207.2, "category": "post-transition-metal", "y": 6, "x": 14 },
         { "number": 114, "symbol": "Fl", "name": "ฟลีโรเวียม", "mass": 289, "category": "post-transition-metal", "y": 7, "x": 14 },
-
-        // Group 15
         { "number": 7, "symbol": "N", "name": "ไนโตรเจน", "mass": 14.007, "category": "diatomic-nonmetal", "y": 2, "x": 15 },
         { "number": 15, "symbol": "P", "name": "ฟอสฟอรัส", "mass": 30.974, "category": "polyatomic-nonmetal", "y": 3, "x": 15 },
         { "number": 33, "symbol": "As", "name": "สารหนู", "mass": 74.922, "category": "metalloid", "y": 4, "x": 15 },
         { "number": 51, "symbol": "Sb", "name": "พลวง", "mass": 121.76, "category": "metalloid", "y": 5, "x": 15 },
         { "number": 83, "symbol": "Bi", "name": "บิสมัท", "mass": 208.98, "category": "post-transition-metal", "y": 6, "x": 15 },
         { "number": 115, "symbol": "Mc", "name": "มอสโกเวียม", "mass": 290, "category": "post-transition-metal", "y": 7, "x": 15 },
-
-        // Group 16
         { "number": 8, "symbol": "O", "name": "ออกซิเจน", "mass": 15.999, "category": "diatomic-nonmetal", "y": 2, "x": 16 },
         { "number": 16, "symbol": "S", "name": "กำมะถัน", "mass": 32.06, "category": "polyatomic-nonmetal", "y": 3, "x": 16 },
         { "number": 34, "symbol": "Se", "name": "ซีลีเนียม", "mass": 78.971, "category": "polyatomic-nonmetal", "y": 4, "x": 16 },
         { "number": 52, "symbol": "Te", "name": "เทลลูเรียม", "mass": 127.60, "category": "metalloid", "y": 5, "x": 16 },
         { "number": 84, "symbol": "Po", "name": "โพโลเนียม", "mass": 209, "category": "metalloid", "y": 6, "x": 16 },
         { "number": 116, "symbol": "Lv", "name": "ลิเวอร์มอเรียม", "mass": 293, "category": "post-transition-metal", "y": 7, "x": 16 },
-
-        // Group 17: Halogens
         { "number": 9, "symbol": "F", "name": "ฟลูออรีน", "mass": 18.998, "category": "diatomic-nonmetal", "y": 2, "x": 17 },
         { "number": 17, "symbol": "Cl", "name": "คลอรีน", "mass": 35.45, "category": "diatomic-nonmetal", "y": 3, "x": 17 },
         { "number": 35, "symbol": "Br", "name": "โบรมีน", "mass": 79.904, "category": "diatomic-nonmetal", "y": 4, "x": 17 },
         { "number": 53, "symbol": "I", "name": "ไอโอดีน", "mass": 126.90, "category": "diatomic-nonmetal", "y": 5, "x": 17 },
         { "number": 85, "symbol": "At", "name": "แอสทาทีน", "mass": 210, "category": "diatomic-nonmetal", "y": 6, "x": 17 },
         { "number": 117, "symbol": "Ts", "name": "เทนเนสซีน", "mass": 294, "category": "diatomic-nonmetal", "y": 7, "x": 17 },
-
-        // Group 18: Noble Gases
         { "number": 2, "symbol": "He", "name": "ฮีเลียม", "mass": 4.0026, "category": "noble-gas", "y": 1, "x": 18 },
         { "number": 10, "symbol": "Ne", "name": "นีออน", "mass": 20.180, "category": "noble-gas", "y": 2, "x": 18 },
         { "number": 18, "symbol": "Ar", "name": "อาร์กอน", "mass": 39.948, "category": "noble-gas", "y": 3, "x": 18 },
@@ -67,9 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { "number": 54, "symbol": "Xe", "name": "ซีนอน", "mass": 131.29, "category": "noble-gas", "y": 5, "x": 18 },
         { "number": 86, "symbol": "Rn", "name": "เรดอน", "mass": 222, "category": "noble-gas", "y": 6, "x": 18 },
         { "number": 118, "symbol": "Og", "name": "โอกาเนสซอน", "mass": 294, "category": "noble-gas", "y": 7, "x": 18 },
-
-        // Transition Metals (Groups 3-12), ordered by Period then by Group
-        // Period 4 Transition Metals
         { "number": 21, "symbol": "Sc", "name": "สแกนเดียม", "mass": 44.956, "category": "transition-metal", "y": 4, "x": 3 },
         { "number": 22, "symbol": "Ti", "name": "ไทเทเนียม", "mass": 47.867, "category": "transition-metal", "y": 4, "x": 4 },
         { "number": 23, "symbol": "V", "name": "วาเนเดียม", "mass": 50.942, "category": "transition-metal", "y": 4, "x": 5 },
@@ -80,8 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { "number": 28, "symbol": "Ni", "name": "นิกเกิล", "mass": 58.693, "category": "transition-metal", "y": 4, "x": 10 },
         { "number": 29, "symbol": "Cu", "name": "ทองแดง", "mass": 63.546, "category": "transition-metal", "y": 4, "x": 11 },
         { "number": 30, "symbol": "Zn", "name": "สังกะสี", "mass": 65.38, "category": "transition-metal", "y": 4, "x": 12 },
-
-        // Period 5 Transition Metals
         { "number": 39, "symbol": "Y", "name": "อิตเทรียม", "mass": 88.906, "category": "transition-metal", "y": 5, "x": 3 },
         { "number": 40, "symbol": "Zr", "name": "เซอร์โคเนียม", "mass": 91.224, "category": "transition-metal", "y": 5, "x": 4 },
         { "number": 41, "symbol": "Nb", "name": "ไนโอเบียม", "mass": 92.906, "category": "transition-metal", "y": 5, "x": 5 },
@@ -92,8 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { "number": 46, "symbol": "Pd", "name": "แพลเลเดียม", "mass": 106.42, "category": "transition-metal", "y": 5, "x": 10 },
         { "number": 47, "symbol": "Ag", "name": "เงิน", "mass": 107.87, "category": "transition-metal", "y": 5, "x": 11 },
         { "number": 48, "symbol": "Cd", "name": "แคดเมียม", "mass": 112.41, "category": "transition-metal", "y": 5, "x": 12 },
-
-        // Period 6 Transition Metals
         { "number": 72, "symbol": "Hf", "name": "แฮฟเนียม", "mass": 178.49, "category": "transition-metal", "y": 6, "x": 4 },
         { "number": 73, "symbol": "Ta", "name": "แทนทาลัม", "mass": 180.95, "category": "transition-metal", "y": 6, "x": 5 },
         { "number": 74, "symbol": "W", "name": "ทังสเตน", "mass": 183.84, "category": "transition-metal", "y": 6, "x": 6 },
@@ -103,8 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { "number": 78, "symbol": "Pt", "name": "แพลทินัม", "mass": 195.08, "category": "transition-metal", "y": 6, "x": 10 },
         { "number": 79, "symbol": "Au", "name": "ทองคำ", "mass": 196.97, "category": "transition-metal", "y": 6, "x": 11 },
         { "number": 80, "symbol": "Hg", "name": "ปรอท", "mass": 200.59, "category": "transition-metal", "y": 6, "x": 12 },
-
-        // Period 7 Transition Metals
         { "number": 104, "symbol": "Rf", "name": "รัทเทอร์ฟอร์เดียม", "mass": 267, "category": "transition-metal", "y": 7, "x": 4 },
         { "number": 105, "symbol": "Db", "name": "ดุบเนียม", "mass": 268, "category": "transition-metal", "y": 7, "x": 5 },
         { "number": 106, "symbol": "Sg", "name": "ซีบอร์เกียม", "mass": 269, "category": "transition-metal", "y": 7, "x": 6 },
@@ -114,8 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { "number": 110, "symbol": "Ds", "name": "ดาร์มสตัดเทียม", "mass": 281, "category": "transition-metal", "y": 7, "x": 10 },
         { "number": 111, "symbol": "Rg", "name": "เรินต์เกเนียม", "mass": 282, "category": "transition-metal", "y": 7, "x": 11 },
         { "number": 112, "symbol": "Cn", "name": "โคเปอร์นิเซียม", "mass": 285, "category": "transition-metal", "y": 7, "x": 12 },
-
-        // Lanthanides (La to Lu) - usually at the bottom
         { "number": 57, "symbol": "La", "name": "แลนทานัม", "mass": 138.91, "category": "lanthanide", "y": 9, "x": 3 },
         { "number": 58, "symbol": "Ce", "name": "ซีเรียม", "mass": 140.12, "category": "lanthanide", "y": 9, "x": 4 },
         { "number": 59, "symbol": "Pr", "name": "เพรซีโอดิเมียม", "mass": 140.91, "category": "lanthanide", "y": 9, "x": 5 },
@@ -131,8 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { "number": 69, "symbol": "Tm", "name": "ทูเลียม", "mass": 168.93, "category": "lanthanide", "y": 9, "x": 15 },
         { "number": 70, "symbol": "Yb", "name": "อิตเทอร์เบียม", "mass": 173.05, "category": "lanthanide", "y": 9, "x": 16 },
         { "number": 71, "symbol": "Lu", "name": "ลูทีเชียม", "mass": 174.97, "category": "lanthanide", "y": 9, "x": 17 },
-
-        // Actinides (Ac to Lr) - usually at the bottom
         { "number": 89, "symbol": "Ac", "name": "แอกทิเนียม", "mass": 227, "category": "actinide", "y": 10, "x": 3 },
         { "number": 90, "symbol": "Th", "name": "ทอเรียม", "mass": 232.04, "category": "actinide", "y": 10, "x": 4 },
         { "number": 91, "symbol": "Pa", "name": "โพรแทกทิเนียม", "mass": 231.04, "category": "actinide", "y": 10, "x": 5 },
@@ -162,6 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
         "polyatomic-nonmetal": "อโลหะ (พอลิอะตอม)",
         "noble-gas": "แก๊สมีสกุล",
     };
+
+    // --- NEW: Default Size Constants ---
+    const DESKTOP_DEFAULT_CELL_SIZE = 65;
+    const MOBILE_DEFAULT_CELL_SIZE = 52;
+
 
     // --- DOM Element References ---
     const selectionScreen = document.getElementById('selection-screen');
@@ -204,6 +181,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const newGroupNameInput = document.getElementById('new-group-name-input');
     const saveNewGroupBtn = document.getElementById('save-new-group-btn');
 
+    // ===== NEW: Table Size Control References =====
+    const cellWidthSlider = document.getElementById('cell-width-slider');
+    const cellWidthValue = document.getElementById('cell-width-value');
+    const cellHeightSlider = document.getElementById('cell-height-slider');
+    const cellHeightValue = document.getElementById('cell-height-value');
+    const resetSizeBtn = document.getElementById('reset-size-btn'); // New button reference
+
     // ===== STATE =====
     let selectedElementsData = [];
     let currentCardIndex = 0;
@@ -215,15 +199,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== NEW: State for Touch Drag & Drop =====
     let touchState = {
         isDragging: false,
-        draggedElement: null, // The visual clone being dragged
-        originalElement: null, // The actual element that was touched
-        source: null, // 'bank' or 'grid'
-        originPlaceholder: null, // if source is 'grid'
+        draggedElement: null,
+        originalElement: null,
+        source: null,
+        originPlaceholder: null,
     };
 
 
-    // ===== SETTINGS LOGIC, SETUP LOGIC, etc. (No changes here) =====
-    // ... (โค้ดส่วนนี้เหมือนเดิมทั้งหมด) ...
+    // ===== SETTINGS LOGIC, SETUP LOGIC, etc. =====
     const setTheme = (theme) => {
         document.body.className = `${theme}-mode`;
         lightModeBtn.classList.toggle('active', theme === 'light');
@@ -236,6 +219,53 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('gameMode', mode);
     };
 
+    // --- UPDATED: Table Cell Size Function ---
+    const setCellSize = (width, height) => {
+        // Ensure values are numbers
+        const w = Number(width);
+        const h = Number(height);
+
+        // Update CSS variables
+        document.documentElement.style.setProperty('--cell-width', `${w}px`);
+        document.documentElement.style.setProperty('--cell-height', `${h}px`);
+
+        // Update slider UI
+        cellWidthSlider.value = w;
+        cellWidthValue.textContent = `${w}px`;
+        cellHeightSlider.value = h;
+        cellHeightValue.textContent = `${h}px`;
+
+        // Save to localStorage
+        localStorage.setItem('customCellWidth', w);
+        localStorage.setItem('customCellHeight', h);
+    };
+
+    // --- Event Listeners for NEW controls ---
+    cellWidthSlider.addEventListener('input', (e) => {
+        const newWidth = e.target.value;
+        const currentHeight = cellHeightSlider.value;
+        setCellSize(newWidth, currentHeight); // Use the function to update everything
+    });
+
+    cellHeightSlider.addEventListener('input', (e) => {
+        const newHeight = e.target.value;
+        const currentWidth = cellWidthSlider.value;
+        setCellSize(currentWidth, newHeight); // Use the function to update everything
+    });
+
+    // --- NEW: Reset Button Logic ---
+    resetSizeBtn.addEventListener('click', () => {
+        // Check if the viewport matches mobile size
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
+        const defaultSize = isMobile ? MOBILE_DEFAULT_CELL_SIZE : DESKTOP_DEFAULT_CELL_SIZE;
+
+        setCellSize(defaultSize, defaultSize);
+
+        // Optional: remove from storage so the next page load also uses the default
+        localStorage.removeItem('customCellWidth');
+        localStorage.removeItem('customCellHeight');
+    });
+
     settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
     closeModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
     settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.add('hidden'); });
@@ -244,6 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gameModeRadios.forEach(radio => radio.addEventListener('change', (e) => setGameMode(e.target.value)));
 
     const createPeriodicTable = () => {
+        // ... (โค้ดส่วนนี้เหมือนเดิม)
         elements.forEach(el => {
             const elDiv = document.createElement('div');
             elDiv.className = `element ${el.category}`;
@@ -257,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const createLegend = () => {
+        // ... (โค้ดส่วนนี้เหมือนเดิม)
         Object.entries(categories).forEach(([key, value]) => {
             if (!document.querySelector(`.legend-item .${key}`)) {
                 const legendItem = document.createElement('div');
@@ -266,6 +298,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
+
+    // ... (ส่วนที่เหลือของไฟล์ script.js ทั้งหมดไม่มีการเปลี่ยนแปลง)
+    // ... (All remaining code for game logic, custom groups, etc. is unchanged) ...
 
     const prepareGame = () => {
         if (isCreatingGroup) return; // Prevent starting game while creating group
@@ -342,6 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayNextFillElement();
     };
 
+
     /**
      * UPDATED: This function is now the single source of truth for placing an element,
      * called by both mouse drop and touch end.
@@ -410,8 +446,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     placeholder.style.gridColumn = x;
                     placeholder.style.gridRow = y;
                     // MOUSE event
-                    placeholder.addEventListener('dragover', e => { e.preventDefault();
-                        placeholder.classList.add('drag-over'); });
+                    placeholder.addEventListener('dragover', e => {
+                        e.preventDefault();
+                        placeholder.classList.add('drag-over');
+                    });
                     placeholder.addEventListener('dragleave', () => placeholder.classList.remove('drag-over'));
                     placeholder.addEventListener('drop', handleMouseDrop);
                     fillPeriodicTable.appendChild(placeholder);
@@ -637,6 +675,8 @@ document.addEventListener('DOMContentLoaded', () => {
         startGameBtn.textContent = '▶️ เริ่มเกม';
     };
 
+
+
     // ===== EVENT LISTENERS =====
     // ... (Event Listeners เดิมทั้งหมด)
     customGroupsBtn.addEventListener('click', () => {
@@ -718,8 +758,10 @@ document.addEventListener('DOMContentLoaded', () => {
     closeCustomGroupsModalBtn.addEventListener('click', () => customGroupsModal.classList.add('hidden'));
     closeSaveGroupModalBtn.addEventListener('click', () => saveGroupModal.classList.add('hidden'));
     flipCardBtn.addEventListener('click', () => flashcard.classList.toggle('flipped'));
-    nextCardBtn.addEventListener('click', () => { currentCardIndex++;
-        displayCard(); });
+    nextCardBtn.addEventListener('click', () => {
+        currentCardIndex++;
+        displayCard();
+    });
     backToSelectionBtn.addEventListener('click', backToSelectionFromFlashcard);
     selectAllBtn.addEventListener('click', () => document.querySelectorAll('.element').forEach(el => el.classList.add('selected')));
     deselectAllBtn.addEventListener('click', () => document.querySelectorAll('.element').forEach(el => el.classList.remove('selected')));
@@ -727,28 +769,52 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.element.selected').forEach(el => el.classList.remove('selected'));
         document.querySelectorAll('.element').forEach(el => {
             const col = parseInt(el.style.gridColumn);
-            if (col === 1 || col === 2 || (col >= 13 && col <= 18) && (parseInt(el.style.gridRow) < 7)) {
+            if (col === 1 || col === 2 || (col >= 13 && col <= 18)) {
                 el.classList.add('selected');
             }
         });
     });
     closeChoiceModalBtn.addEventListener('click', () => gameChoiceModal.classList.add('hidden'));
     gameChoiceModal.addEventListener('click', (e) => { if (e.target === gameChoiceModal) gameChoiceModal.classList.add('hidden'); });
-    startFlashcardGameBtn.addEventListener('click', () => { gameChoiceModal.classList.add('hidden');
-        startFlashcardGame(); });
-    startFillGameBtn.addEventListener('click', () => { gameChoiceModal.classList.add('hidden');
-        startFillTheBlanksGame(); });
+    startFlashcardGameBtn.addEventListener('click', () => {
+        gameChoiceModal.classList.add('hidden');
+        startFlashcardGame();
+    });
+    startFillGameBtn.addEventListener('click', () => {
+        gameChoiceModal.classList.add('hidden');
+        startFillTheBlanksGame();
+    });
     checkAnswersBtn.addEventListener('click', checkAnswers);
     fillBackToSelectionBtn.addEventListener('click', backToSelectionFromFill);
 
     // ===== INITIALIZATION =====
     const initializeApp = () => {
+        if (!elements || elements.length === 0) {
+            console.error("Element data is missing. Please paste it into the script.");
+            alert("ข้อมูลธาตุไม่สมบูรณ์ กรุณาตรวจสอบไฟล์ script.js");
+            return;
+        }
         createPeriodicTable();
         createLegend();
+        // setupEventListeners(); // This line was a duplicate/unnecessary
+
         const savedTheme = localStorage.getItem('theme') || 'light';
         const savedGameMode = localStorage.getItem('gameMode') || 'symbol-to-name';
+
+        // --- UPDATED: Initialization logic for cell size ---
+        let initialWidth = localStorage.getItem('customCellWidth');
+        let initialHeight = localStorage.getItem('customCellHeight');
+
+        if (!initialWidth || !initialHeight) {
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            const defaultSize = isMobile ? MOBILE_DEFAULT_CELL_SIZE : DESKTOP_DEFAULT_CELL_SIZE;
+            initialWidth = defaultSize;
+            initialHeight = defaultSize;
+        }
+
         setTheme(savedTheme);
         setGameMode(savedGameMode);
+        setCellSize(initialWidth, initialHeight); // Use the new logic to set initial size
     };
 
     initializeApp();

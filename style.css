@@ -1,6 +1,9 @@
 /* --- Root Variables --- */
 
 :root {
+    /* NEW: Variables for table cell size, controlled by JS */
+    --cell-width: 60px;
+    --cell-height: 60px;
     --bg-color: #f0f2f5;
     --table-bg: #ffffff;
     --text-color: #212529;
@@ -108,21 +111,31 @@ button {
 
 /* --- Periodic Table --- */
 
-#periodic-table-container {
+#periodic-table-container,
+#fill-periodic-table-container {
     overflow-x: auto;
     padding-bottom: 15px;
 }
 
-#periodic-table {
+
+/* MODIFIED: Both tables now use the CSS variables for size */
+
+#periodic-table,
+#fill-periodic-table {
     display: grid;
-    grid-template-columns: repeat(18, minmax(60px, 1fr));
-    grid-auto-rows: minmax(60px, 1fr);
+    /* Using variables for grid cell sizing */
+    grid-template-columns: repeat(18, var(--cell-width));
+    grid-auto-rows: var(--cell-height);
     gap: 5px;
     padding: 10px;
     background-color: var(--table-bg);
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    min-width: 1200px;
+    /* min-width is now implicitly set by the column widths */
+    width: fit-content;
+    /* Important for container scrolling */
+    margin: 0 auto;
+    /* Center the table if container is wider */
 }
 
 .element {
@@ -406,6 +419,7 @@ body.dark-mode #settings-btn {
     align-items: center;
     padding: 10px 0;
     flex-wrap: wrap;
+    gap: 10px;
 }
 
 .modal-body .setting-item>span {
@@ -446,6 +460,42 @@ input[type="radio"] {
     accent-color: var(--primary-btn-bg);
     width: 16px;
     height: 16px;
+}
+
+
+/* === NEW Styles for Size Controls === */
+
+.setting-item.slider-control {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.setting-item.slider-control>span {
+    margin-bottom: 8px;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+}
+
+input[type="range"] {
+    flex-grow: 1;
+    accent-color: var(--primary-btn-bg);
+}
+
+#reset-size-btn {
+    width: 100%;
+    margin-top: 10px;
+    background-color: #ffc107;
+    color: #212529;
+    font-weight: 500;
+}
+
+#reset-size-btn:hover {
+    background-color: #e0a800;
 }
 
 
@@ -661,26 +711,6 @@ body.dark-mode #settings-btn:hover {
 
 /* Container for the empty grid */
 
-#fill-periodic-table-container {
-    overflow-x: auto;
-    padding-bottom: 15px;
-}
-
-
-/* The empty grid itself */
-
-#fill-periodic-table {
-    display: grid;
-    grid-template-columns: repeat(18, minmax(60px, 1fr));
-    grid-auto-rows: minmax(60px, 1fr);
-    gap: 5px;
-    padding: 10px;
-    background-color: var(--table-bg);
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    min-width: 1200px;
-}
-
 
 /* Individual empty cells in the grid */
 
@@ -778,14 +808,6 @@ body.dark-mode #settings-btn:hover {
     h1 {
         font-size: 2rem;
     }
-    /* Make both periodic tables slightly smaller */
-    #periodic-table,
-    #fill-periodic-table {
-        min-width: 990px;
-        grid-template-columns: repeat(18, 55px);
-        grid-auto-rows: minmax(55px, 1fr);
-        gap: 3px;
-    }
     .flashcard-container {
         max-width: 450px;
         max-height: 270px;
@@ -822,14 +844,16 @@ body.dark-mode #settings-btn:hover {
         font-size: 0.85rem;
         /* Smaller button text */
     }
-    /* Further shrink both periodic tables */
+    /*
+     * === KEY CHANGE ===
+     * Removed the hardcoded grid-template-columns and grid-auto-rows.
+     * The table will now correctly use the --cell-width and --cell-height
+     * variables set by the JavaScript, making the sliders work on mobile.
+    */
     #periodic-table,
     #fill-periodic-table {
-        min-width: 810px;
-        /* still needs to be scrollable */
-        grid-template-columns: repeat(18, 45px);
-        grid-auto-rows: minmax(45px, 1fr);
-        gap: 2px;
+        gap: 4px;
+        /* Slightly smaller gap for smaller screens */
     }
     .element {
         font-size: 0.55rem;
@@ -901,50 +925,12 @@ body.dark-mode #settings-btn:hover {
 /* Small mobile devices (<= 480px) */
 
 @media (max-width: 480px) {
-    body {
-        font-size: 14px;
-        /* Even smaller base font */
-    }
-    h1 {
-        font-size: 1.4rem;
-    }
-    button {
-        padding: 6px 10px;
+    /* Further fine-tuning for very small screens if needed */
+    .element .symbol {
         font-size: 0.8rem;
     }
-    #controls,
-    #game-controls,
-    #fill-game-controls {
-        gap: 6px;
-        /* Tighter button spacing */
-    }
-    /* Smallest periodic tables */
-    #periodic-table,
-    #fill-periodic-table {
-        min-width: 720px;
-        /* Adjust min-width for smaller cells */
-        grid-template-columns: repeat(18, 40px);
-        grid-auto-rows: minmax(40px, 1fr);
-    }
-    .flashcard-container {
-        height: 60vw;
-        max-height: 200px;
-        /* Cap height */
-    }
-    .card-front-symbol {
-        font-size: 3rem;
-    }
-    .card-front-name {
-        font-size: 1.6rem;
-    }
-    .card-back h2 {
-        font-size: 1.4rem;
-    }
-    .card-back p {
-        font-size: 0.9rem;
-    }
-    /* Compacting Fill Game UI further */
-    #fill-game-screen h1 {
-        font-size: 1.3rem;
+    .element .name {
+        display: none;
+        /* Hide name on very small elements */
     }
 }

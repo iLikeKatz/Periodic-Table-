@@ -55,7 +55,7 @@
     </div>
 
     <div id="fill-game-screen" class="hidden">
-        <h1 id="ins2">เติมธาตุในตารางให้ถูกต้อง</h1>
+        <h1 id="">เติมธาตุในตารางให้ถูกต้อง</h1>
         <p>ลากธาตุด้านล่างไปวางในตำแหน่งที่ถูกต้องบนตารางธาตุ</p>
         <div id="element-bank-container">
             <h3>ธาตุที่จะวาง:</h3>
@@ -96,6 +96,24 @@
                             <span>ชื่อธาตุ → สัญลักษณ์</span>
                         </label>
                     </div>
+                </div>
+
+                <div class="setting-item slider-control">
+                    <span>ขนาดตาราง (กว้าง)</span>
+                    <div class="slider-container">
+                        <input type="range" id="cell-width-slider" min="30" max="80" value="60">
+                        <span id="cell-width-value">60px</span>
+                    </div>
+                </div>
+                <div class="setting-item slider-control">
+                    <span>ขนาดตาราง (สูง)</span>
+                    <div class="slider-container">
+                        <input type="range" id="cell-height-slider" min="30" max="80" value="60">
+                        <span id="cell-height-value">60px</span>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <button id="reset-size-btn">รีเซ็ตขนาด (Default)</button>
                 </div>
             </div>
         </div>
@@ -143,7 +161,6 @@
             </div>
         </div>
     </div>
-
 
     <script src="script.js"></script>
 </body>
