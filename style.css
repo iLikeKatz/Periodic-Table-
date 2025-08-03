@@ -715,15 +715,28 @@ body.dark-mode #settings-btn:hover {
 /* Individual empty cells in the grid */
 
 .placeholder-element {
-    border: 2px dashed var(--border-color);
+    border: 1px dashed var(--border-color);
+    /* ลดความหนาเส้นขอบให้เท่ากับธาตุปกติ */
     border-radius: 4px;
     transition: background-color 0.2s, border-style 0.2s;
-    min-height: 60px;
-    /* ensure placeholders have a size */
     display: flex;
-    /* To center dropped elements */
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
+    /* สำคัญมาก: ทำให้ border ไม่ไปเพิ่มขนาดของกล่อง */
+}
+
+
+/* NEW: Add this class when a placeholder has an element inside */
+
+
+/* สไตล์สำหรับช่องที่ "มี" ธาตุวางอยู่ */
+
+.placeholder-element.has-element {
+    border-color: transparent;
+    /* ซ่อนเส้นประเมื่อมีธาตุอยู่ข้างใน */
+    padding: 0;
+    background-color: transparent;
 }
 
 .placeholder-element.drag-over {
@@ -734,18 +747,26 @@ body.dark-mode #settings-btn:hover {
 
 /* The element once it's been dropped */
 
+
+/* The element once it's been dropped (MODIFIED) */
+
+
+/* จัดการให้ธาตุที่นำมาวาง มีหน้าตาเหมือนหน้าแรกเป๊ะๆ */
+
 .placeholder-element .element {
     margin: 0;
-    /* Override default margin */
     width: 100%;
     height: 100%;
-    cursor: default;
-    /* No pointer cursor once dropped */
+    cursor: grab;
+    /* เปลี่ยนเป็น grab เพื่อให้รู้ว่าลากย้ายที่ได้ */
+    border-radius: 4px;
+    /* ต้องกำหนดซ้ำเพื่อให้แสดงผลถูกต้อง */
 }
 
 .placeholder-element .element:hover {
     transform: none;
-    /* No hover effect once dropped */
+    z-index: 1;
+    border-color: rgba(0, 0, 0, 0.2);
 }
 
 
@@ -919,6 +940,9 @@ body.dark-mode #settings-btn:hover {
         margin-top: 15px;
         /* Less space above bottom buttons */
     }
+    #topFill {
+        margin-top: 30px;
+    }
 }
 
 
@@ -930,7 +954,83 @@ body.dark-mode #settings-btn:hover {
         font-size: 0.8rem;
     }
     .element .name {
-        display: none;
         /* Hide name on very small elements */
+        font-size: 0.1rem
+    }
+}
+
+@media (orientation: landscape) and (max-height: 400px) {
+    /* ลดขนาดของ Body เพื่อให้มีพื้นที่ว่างด้านข้างน้อยลง */
+    body {
+        padding: 5px;
+    }
+    /* ย่อขนาดของตารางธาตุให้เล็กลงอย่างมาก เพื่อให้เห็นภาพรวมได้กว้างขึ้น */
+     :root {
+        --cell-width: 42px;
+        --cell-height: 42px;
+    }
+    /* ย่อขนาดตัวอักษรบนธาตุแต่ละช่องให้สอดคล้องกัน */
+    .element {
+        font-size: 0.5rem;
+    }
+    .element .symbol {
+        font-size: 0.8rem;
+    }
+    .element .atomic-number {
+        font-size: 0.4rem;
+    }
+    .element .name {
+        display: none;
+        /* ซ่อนชื่อธาตุไปเลย เพื่อประหยัดพื้นที่ให้มากที่สุด */
+    }
+    /* ลดขนาดหัวข้อหลักและระยะห่าง */
+    h1 {
+        font-size: 1.4rem;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    /* ลดขนาดปุ่มควบคุมและระยะห่าง */
+    #controls {
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+    #controls button {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+    /* ลดขนาดของ Legend */
+    #legend {
+        gap: 5px 10px;
+        margin: 10px auto;
+        max-width: 100%;
+    }
+    .legend-item {
+        font-size: 0.7rem;
+    }
+    .legend-color-box {
+        width: 12px;
+        height: 12px;
+    }
+    /* ย่อหน้าจอเกม Flashcard ให้พอดีกับความสูงที่จำกัด */
+    .flashcard-container {
+        max-width: 300px;
+        max-height: 180px;
+        margin: 10px auto;
+    }
+    .card-front-symbol {
+        font-size: 3.5rem;
+    }
+    .card-front-name {
+        font-size: 2rem;
+    }
+    .card-back h2 {
+        font-size: 1.5rem;
+    }
+    .card-back p {
+        font-size: 1rem;
+    }
+    #game-controls button {
+        padding: 8px 12px;
+        font-size: 0.8rem;
     }
 }

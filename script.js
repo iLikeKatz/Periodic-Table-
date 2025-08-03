@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const DESKTOP_DEFAULT_CELL_SIZE = 65;
     const MOBILE_DEFAULT_CELL_SIZE = 52;
 
-
     // --- DOM Element References ---
     const selectionScreen = document.getElementById('selection-screen');
     const gameScreen = document.getElementById('game-screen');
@@ -769,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.element.selected').forEach(el => el.classList.remove('selected'));
         document.querySelectorAll('.element').forEach(el => {
             const col = parseInt(el.style.gridColumn);
-            if (col === 1 || col === 2 || (col >= 13 && col <= 18)) {
+            if (col === 1 || col === 2 || (col >= 13 && col <= 18) && (parseInt(el.style.gridRow) < 7)) { // selecct 8 main elements
                 el.classList.add('selected');
             }
         });
