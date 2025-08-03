@@ -233,10 +233,13 @@ button {
 .flashcard-container {
     perspective: 1000px;
     width: 90vw;
-    height: 50vw;
-    max-width: 350px;
-    max-height: 220px;
+    /* Use viewport width for responsiveness */
+    height: 55vw;
+    /* Maintain aspect ratio */
     margin: 20px auto;
+    /* INCREASED max-width for larger desktop view */
+    max-width: 500px;
+    max-height: 300px;
 }
 
 .flashcard {
@@ -275,12 +278,14 @@ button {
 
 .card-front-symbol {
     font-family: 'Roboto', sans-serif;
-    font-size: 5rem;
+    font-size: 6rem;
+    /* Increased base size */
     font-weight: bold;
 }
 
 .card-front-name {
-    font-size: 2.5rem;
+    font-size: 3rem;
+    /* Increased base size */
     font-weight: bold;
 }
 
@@ -292,13 +297,15 @@ button {
 
 .card-back h2 {
     margin: 0 0 10px 0;
-    font-size: 1.8rem;
+    font-size: 2rem;
+    /* Increased base size */
     color: var(--primary-btn-bg);
 }
 
 .card-back p {
     margin: 5px 0;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    /* Increased base size */
 }
 
 
@@ -754,7 +761,43 @@ body.dark-mode #settings-btn:hover {
 }
 
 
-/* --- Responsive Design --- */
+/* --- Responsive Design (UPDATED SECTION) --- */
+
+
+/* Tablets and smaller desktops (<= 1024px) */
+
+@media (max-width: 1024px) {
+    h1 {
+        font-size: 2rem;
+    }
+    /* Make both periodic tables slightly smaller */
+    #periodic-table,
+    #fill-periodic-table {
+        min-width: 990px;
+        grid-template-columns: repeat(18, 55px);
+        grid-auto-rows: minmax(55px, 1fr);
+        gap: 3px;
+    }
+    .flashcard-container {
+        max-width: 450px;
+        max-height: 270px;
+    }
+    .card-front-symbol {
+        font-size: 5rem;
+    }
+    .card-front-name {
+        font-size: 2.5rem;
+    }
+    .card-back h2 {
+        font-size: 1.8rem;
+    }
+    .card-back p {
+        font-size: 1.1rem;
+    }
+}
+
+
+/* Mobile devices (<= 768px) */
 
 @media (max-width: 768px) {
     body {
@@ -763,22 +806,127 @@ body.dark-mode #settings-btn:hover {
     h1 {
         font-size: 1.8rem;
     }
-    .card-front-name {
-        font-size: 2rem;
+    button {
+        padding: 8px 14px;
+        font-size: 0.9rem;
+    }
+    /* Further shrink both periodic tables */
+    #periodic-table,
+    #fill-periodic-table {
+        min-width: 900px;
+        /* still needs to be scrollable */
+        grid-template-columns: repeat(18, 50px);
+        grid-auto-rows: minmax(50px, 1fr);
+        gap: 3px;
+    }
+    .element {
+        font-size: 0.6rem;
+        /* Smaller text on element */
+        padding: 2px 1px;
+    }
+    .element .symbol {
+        font-size: 1rem;
+    }
+    .element .atomic-number {
+        font-size: 0.5rem;
+    }
+    .flashcard-container {
+        max-width: 400px;
+        max-height: 240px;
     }
     .card-front-symbol {
         font-size: 4rem;
     }
-    #periodic-table {
-        min-width: 900px;
-        grid-template-columns: repeat(18, 50px);
-        grid-template-rows: repeat(10, 50px);
-        gap: 3px;
+    .card-front-name {
+        font-size: 2.2rem;
     }
-    .element {
-        font-size: 0.5rem;
+    #legend {
+        gap: 10px;
+    }
+    .legend-item {
+        font-size: 0.8rem;
+    }
+    .legend-color-box {
+        width: 15px;
+        height: 15px;
+    }
+}
+
+
+/* Small mobile devices (<= 480px) */
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+    #controls,
+    #game-controls,
+    #fill-game-controls {
+        gap: 8px;
+        /* Tighter button spacing */
+    }
+    /* Smallest periodic tables */
+    #periodic-table,
+    #fill-periodic-table {
+        min-width: 810px;
+        /* still needs to be scrollable */
+        grid-template-columns: repeat(18, 45px);
+        grid-auto-rows: minmax(45px, 1fr);
+        gap: 2px;
     }
     .element .symbol {
+        font-size: 0.9rem;
+    }
+    .flashcard-container {
+        /* Height is more constrained in portrait on small phones */
+        height: 60vw;
+        max-height: 220px;
+    }
+    .card-front-symbol {
+        font-size: 3.5rem;
+    }
+    .card-front-name {
+        font-size: 1.8rem;
+    }
+    .card-back h2 {
+        font-size: 1.5rem;
+    }
+    .card-back p {
         font-size: 1rem;
+    }
+}
+
+
+/* Landscape mode on small devices (e.g., phones) */
+
+@media (max-height: 450px) and (orientation: landscape) {
+    #game-screen h1,
+    #fill-game-screen h1 {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        font-size: 1.2rem;
+    }
+    .flashcard-container {
+        width: 60vw;
+        height: 40vh;
+        /* Adjust height for landscape */
+        max-width: 300px;
+        margin: 5px auto;
+    }
+    .card-front-symbol {
+        font-size: 3rem;
+    }
+    .card-front-name {
+        font-size: 1.6rem;
+    }
+    .card-back h2 {
+        font-size: 1.3rem;
+    }
+    .card-back p {
+        font-size: 0.8rem;
+        margin: 2px 0;
+    }
+    #game-controls {
+        margin-bottom: 5px;
     }
 }
