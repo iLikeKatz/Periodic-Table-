@@ -313,9 +313,17 @@ button {
 
 #settings-container {
     position: absolute;
-    top: 15px;
+    top: 5px;
     right: 0%;
     z-index: 100;
+}
+
+#ins {
+    margin-top: 30px;
+}
+
+#ins2 {
+    margin-top: 30px;
 }
 
 body.dark-mode #settings-btn {
