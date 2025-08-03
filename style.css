@@ -955,7 +955,7 @@ body.dark-mode #settings-btn:hover {
     }
     .element .name {
         /* Hide name on very small elements */
-        font-size: 0.1rem
+        font-size: 0.5rem
     }
 }
 
