@@ -14,6 +14,7 @@
     --card-back-bg: #f8f9fa;
     --card-back-text: #333;
     --border-color: #ccc;
+    --sidebar-bg: #ffffff;
 }
 
 
@@ -508,6 +509,7 @@ body.dark-mode {
     --card-back-bg: #2a2a2a;
     --card-back-text: #e0e0e0;
     --border-color: #444;
+    --sidebar-bg: #1e1e1e;
 }
 
 body.dark-mode #periodic-table {
@@ -671,6 +673,11 @@ body.dark-mode #settings-btn:hover {
     /* Ensure it has a height */
 }
 
+#element-bank .element {
+    background-color: #cccccc; /* สีเทา */
+    color: #333;
+}
+
 
 /* Style for the element the user needs to place */
 
@@ -708,6 +715,30 @@ body.dark-mode #settings-btn:hover {
     font-size: 0.8rem;
 }
 
+.element.dragging {
+  opacity: 0.5;
+  background-color: #cccccc !important;
+  color: #333 !important;
+}
+
+.dragging-visual {
+    /* --- สไตล์สำคัญสำหรับสีเทา --- */
+    background-color: #cccccc !important; /* สีเทา */
+    color: #333 !important;             /* สีตัวอักษร */
+    border: 1px solid #999;           /* เพิ่มขอบให้เห็นชัดขึ้น */
+
+    /* --- สไตล์อื่นๆ เพื่อให้แสดงผลถูกต้อง --- */
+    position: absolute;
+    z-index: 1000;
+    pointer-events: none; /* เพื่อให้ตรวจจับ element ข้างใต้ได้ */
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border-radius: 4px; /* ทำให้มุมมนเหมือนของเดิม */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
 
 /* Container for the empty grid */
 
@@ -753,6 +784,11 @@ body.dark-mode #settings-btn:hover {
 
 /* จัดการให้ธาตุที่นำมาวาง มีหน้าตาเหมือนหน้าแรกเป๊ะๆ */
 
+.element.placed {
+    background-color: #cccccc; /* สีเทากลางๆ */
+    color: #000000; /* ทำให้ตัวอักษรเป็นสีขาว จะได้อ่านง่าย */
+}
+
 .placeholder-element .element {
     margin: 0;
     width: 100%;
@@ -761,7 +797,7 @@ body.dark-mode #settings-btn:hover {
     /* เปลี่ยนเป็น grab เพื่อให้รู้ว่าลากย้ายที่ได้ */
     border-radius: 4px;
     /* ต้องกำหนดซ้ำเพื่อให้แสดงผลถูกต้อง */
-}
+ }
 
 .placeholder-element .element:hover {
     transform: none;
@@ -816,6 +852,107 @@ body.dark-mode #settings-btn:hover {
 
 #check-answers-btn:hover,
 #fill-back-to-selection-btn:hover {
+    background-color: var(--secondary-btn-hover);
+}
+
+/* --- NEW: Hamburger, Sidebar, Login Styles --- */
+
+#menu-container {
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    z-index: 100;
+}
+
+#hamburger-btn {
+    background-color: transparent;
+    font-size: 1.8rem;
+    color: var(--text-color);
+    padding: 8px 15px;
+}
+
+#hamburger-btn:hover {
+    background-color: var(--secondary-btn-hover);
+    color: white;
+}
+
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background-color: var(--sidebar-bg);
+    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    z-index: 1100;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    color: var(--text-color);
+}
+
+#close-sidebar-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2rem;
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+}
+
+#close-sidebar-btn:hover {
+    color: var(--text-color);
+}
+
+#profile-container {
+    text-align: center;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+#profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 2px solid var(--primary-btn-bg);
+}
+
+#username-display {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+#login-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 40px;
+}
+
+#login-btn {
+    background-color: #4285F4; /* Google Blue */
+    width: 100%;
+}
+
+#login-btn:hover {
+    background-color: #357ae8;
+}
+
+#logout-btn {
+    background-color: var(--secondary-btn-bg);
+    width: 100%;
+}
+
+#logout-btn:hover {
     background-color: var(--secondary-btn-hover);
 }
 
@@ -943,6 +1080,12 @@ body.dark-mode #settings-btn:hover {
     #topFill {
         margin-top: 30px;
     }
+    #hamburger-btn {
+    background-color: transparent;
+    font-size: 1rem;
+    color: var(--text-color);
+    padding: 8px 15px;
+}
 }
 
 

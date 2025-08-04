@@ -17,6 +17,24 @@
         <button id="settings-btn">⚙️ ตั้งค่า</button>
     </div>
 
+    <div id="menu-container">
+        <button id="hamburger-btn">☰</button>
+    </div>
+
+    <div id="sidebar" class="hidden">
+        <button id="close-sidebar-btn">&times;</button>
+        <div id="profile-container" class="hidden">
+            <img id="profile-pic" src="https://via.placeholder.com/80" alt="Profile Picture">
+            <h3 id="username-display">Username</h3>
+            <button id="logout-btn">ออกจากระบบ</button>
+        </div>
+        <div id="login-container">
+            <h3></h1>
+            <button id="login-btn">Sign in with Google</button>
+        </div>
+    </div>
+
+
     <div id="selection-screen">
         <h1 class="instruction" id="ins">เลือกธาตุเพื่อสร้าง Flashcard</h1>
         <p>คลิกบนธาตุที่ต้องการ จากนั้นกด "เริ่มเกม"</p>
@@ -162,6 +180,40 @@
         </div>
     </div>
 
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+        // Import Auth functions
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCxsn_W3oVSM0glCeS7YpkWc-5q8LYShZQ",
+            authDomain: "periodic-table-database.firebaseapp.com",
+            projectId: "periodic-table-database",
+            storageBucket: "periodic-table-database.appspot.com",
+            messagingSenderId: "958737094126",
+            appId: "1:958737094126:web:285f72dad0ace35d70eaff",
+            measurementId: "G-MTNV70JMB4"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Make auth functions available globally for script.js
+        window.firebaseAuth = {
+            auth,
+            provider,
+            signInWithPopup,
+            onAuthStateChanged,
+            signOut
+        };
+    </script>
+    
     <script src="script.js"></script>
 </body>
 

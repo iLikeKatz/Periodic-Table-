@@ -180,6 +180,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const newGroupNameInput = document.getElementById('new-group-name-input');
     const saveNewGroupBtn = document.getElementById('save-new-group-btn');
 
+    // ===== NEW: Sidebar and Login References =====
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const sidebar = document.getElementById('sidebar');
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    const loginContainer = document.getElementById('login-container');
+    const profileContainer = document.getElementById('profile-container');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const profilePic = document.getElementById('profile-pic');
+    const usernameDisplay = document.getElementById('username-display');
+
     // ===== NEW: Table Size Control References =====
     const cellWidthSlider = document.getElementById('cell-width-slider');
     const cellWidthValue = document.getElementById('cell-width-value');
@@ -387,9 +398,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Create the visual element for the grid
         const droppedElementDiv = document.createElement('div');
-        droppedElementDiv.className = `element ${droppedElementData.category}`;
+        droppedElementDiv.className = 'element placed';
         droppedElementDiv.dataset.number = droppedElementData.number;
-        droppedElementDiv.innerHTML = `<div class="atomic-number">${droppedElementData.number}</div><div class="symbol">${droppedElementData.symbol}</div>`;
+        droppedElementDiv.innerHTML = `<div class="symbol">${droppedElementData.symbol}</div>`;
 
         // Make this element draggable for future moves (both mouse and touch)
         makeElementInGridDraggable(droppedElementDiv);
@@ -420,11 +431,18 @@ document.addEventListener('DOMContentLoaded', () => {
         elementDiv.draggable = true;
         elementDiv.addEventListener('dragstart', (e) => {
             e.stopPropagation();
+            // --- เพิ่มบรรทัดนี้ ---
+            elementDiv.classList.add('dragging'); 
             const parentPlaceholder = elementDiv.parentElement;
             e.dataTransfer.setData('text/plain', elementDiv.dataset.number);
             e.dataTransfer.setData('source', 'grid');
             e.dataTransfer.setData('origin-x', parentPlaceholder.dataset.x);
             e.dataTransfer.setData('origin-y', parentPlaceholder.dataset.y);
+        });
+
+        // --- เพิ่ม Event Listener นี้เข้าไป ---
+        elementDiv.addEventListener('dragend', () => {
+            elementDiv.classList.remove('dragging');
         });
 
         // TOUCH events
@@ -471,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
         draggableDiv.className = `draggable-element element ${elementToPlace.category}`;
         draggableDiv.draggable = true;
         draggableDiv.dataset.number = elementToPlace.number;
-        draggableDiv.innerHTML = `<div class="atomic-number">${elementToPlace.number}</div><div class="symbol">${elementToPlace.symbol}</div><div class="name">${elementToPlace.name}</div>`;
+        draggableDiv.innerHTML = `<div class="symbol">${elementToPlace.symbol}</div><div class="name">${elementToPlace.name}</div>`;
 
         // MOUSE event
         draggableDiv.addEventListener('dragstart', (e) => {
@@ -512,34 +530,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ===== NEW: Custom Touch Handlers for Mobile =====
     const handleTouchStart = (e, source) => {
-        e.preventDefault(); // Prevent scrolling
+        e.preventDefault(); // ป้องกันการเลื่อนหน้าจอ
+
         const originalElement = e.currentTarget;
-        touchState.originalElement = originalElement;
+        const touch = e.touches[0];
+
+        // --- จุดเปลี่ยนสำคัญ ---
+        // 1. สร้าง div ขึ้นมาใหม่ทั้งหมด แทนการ clone
+        const dragVisual = document.createElement('div');
+
+        // 2. กำหนดคลาสสำหรับสไตล์โดยเฉพาะ (เราจะไปสร้างคลาสนี้ใน CSS)
+        dragVisual.className = 'dragging-visual'; 
+        
+        // 3. คัดลอกแค่ข้อความ (สัญลักษณ์ธาตุ) มาใส่
+        dragVisual.textContent = originalElement.textContent;
+        // --- สิ้นสุดจุดเปลี่ยน ---
+
+        // กำหนดค่าต่างๆ ที่จำเป็นสำหรับการลาก
+        document.body.appendChild(dragVisual);
+        dragVisual.style.left = `${touch.clientX - originalElement.offsetWidth / 2}px`;
+        dragVisual.style.top = `${touch.clientY - originalElement.offsetHeight / 2}px`;
+        dragVisual.style.width = `${originalElement.offsetWidth}px`;
+        dragVisual.style.height = `${originalElement.offsetHeight}px`;
+
+        // เก็บข้อมูลสถานะการลาก
+        touchState.isDragging = true;
+        touchState.draggedElement = dragVisual; // ตัวที่ลากอยู่ตอนนี้คือ div ที่เราสร้างขึ้นมาใหม่
+        touchState.originalElement = originalElement; // ยังเก็บตัวดั้งเดิมไว้เพื่ออ้างอิง
         touchState.source = source;
 
-        // If dragging from grid, remember where it came from
         if (source === 'grid') {
             touchState.originPlaceholder = originalElement.parentElement;
         }
-
-        // Create a visual clone of the element to drag
-        const clone = originalElement.cloneNode(true);
-        clone.style.position = 'absolute';
-        clone.style.zIndex = '1000';
-        clone.style.pointerEvents = 'none'; // So it doesn't interfere with finding the element underneath
-        clone.style.width = `${originalElement.offsetWidth}px`;
-        clone.style.height = `${originalElement.offsetHeight}px`;
-        document.body.appendChild(clone);
-        touchState.draggedElement = clone;
-
-        // Position the clone under the finger
-        const touch = e.touches[0];
-        clone.style.left = `${touch.clientX - clone.offsetWidth / 2}px`;
-        clone.style.top = `${touch.clientY - clone.offsetHeight / 2}px`;
-
-        touchState.isDragging = true;
-    };
-
+};
     const handleTouchMove = (e) => {
         if (!touchState.isDragging || !touchState.draggedElement) return;
         e.preventDefault();
@@ -590,38 +613,69 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ... (โค้ดส่วน checkAnswers, backToSelectionFromFill และ Custom Groups Logic ไม่มีการเปลี่ยนแปลง) ...
     const checkAnswers = () => {
+    // 1. รีเซ็ตสถานะการตรวจคำตอบทั้งหมดก่อนเริ่มตรวจใหม่
+    document.querySelectorAll('.placeholder-element').forEach(p => {
+        p.classList.remove('correct-placement', 'incorrect-placement');
+        p.removeAttribute('data-correct-symbol');
+    });
+
+    let allCorrect = true;
+
+    // 2. วนลูปตรวจทุกช่องที่มีการวางธาตุลงไป
+    document.querySelectorAll('.placeholder-element:has(.element)').forEach(placeholder => {
+        const droppedElementNumber = placeholder.querySelector('.element').dataset.number;
+        const correctElement = elements.find(el => el.number == droppedElementNumber);
+        const placedX = parseInt(placeholder.dataset.x);
+        const placedY = parseInt(placeholder.dataset.y);
+        const elementDiv = placeholder.querySelector('.element');
+
+        // 3. ตรวจสอบว่าตำแหน่งที่วาง ถูกต้องหรือไม่
+        if (correctElement.x === placedX && correctElement.y === placedY) {
+            // ถ้าถูกต้อง:
+            placeholder.classList.add('correct-placement'); // เพิ่มเส้นขอบสีเขียว
+            if (elementDiv) {
+                elementDiv.classList.remove('placed'); // ลบคลาสสีเทาออก
+                elementDiv.classList.add(correctElement.category); // เพิ่มคลาสสีตามหมวดหมู่กลับไป
+            }
+        } else {
+            // ถ้าไม่ถูกต้อง:
+            allCorrect = false;
+            placeholder.classList.add('incorrect-placement'); // เพิ่มเส้นขอบสีแดง
+            
+            // สร้างคำใบ้ว่าช่องนี้ควรเป็นธาตุอะไร
+            const elementThatShouldBeHere = elements.find(el => el.x === placedX && el.y === placedY);
+            placeholder.dataset.correctSymbol = elementThatShouldBeHere ? `ควรเป็น ${elementThatShouldBeHere.symbol}` : 'ช่องนี้ว่าง';
+        }
+    });
+
+    // 4. ตรวจสอบว่าผู้เล่นวางธาตุครบทุกตัวที่เลือกมาหรือไม่
+    if (Object.keys(placedElements).length < fillGameElements.length) {
+        alert('คุณยังวางธาตุไม่ครบทุกตัว');
+        // รีเซ็ตสถานะการตรวจ เพราะยังไม่ควรแสดงผลลัพธ์
         document.querySelectorAll('.placeholder-element').forEach(p => {
             p.classList.remove('correct-placement', 'incorrect-placement');
             p.removeAttribute('data-correct-symbol');
-        });
-        let allCorrect = true;
-        document.querySelectorAll('.placeholder-element:has(.element)').forEach(placeholder => {
-            const droppedElementNumber = placeholder.querySelector('.element').dataset.number;
-            const correctElement = elements.find(el => el.number == droppedElementNumber);
-            const placedX = parseInt(placeholder.dataset.x);
-            const placedY = parseInt(placeholder.dataset.y);
-            if (correctElement.x === placedX && correctElement.y === placedY) {
-                placeholder.classList.add('correct-placement');
-            } else {
-                allCorrect = false;
-                placeholder.classList.add('incorrect-placement');
-                const elementThatShouldBeHere = elements.find(el => el.x === placedX && el.y === placedY);
-                placeholder.dataset.correctSymbol = elementThatShouldBeHere ? `ควรเป็น ${elementThatShouldBeHere.symbol}` : 'ช่องนี้ว่าง';
+            const elementDiv = p.querySelector('.element');
+            if (elementDiv && !elementDiv.classList.contains('placed')) {
+                 // ถ้ามีการเปลี่ยนสีไปแล้ว ให้กลับเป็นสีเทา
+                const categoryClass = Array.from(elementDiv.classList).find(c => categories[c]);
+                if(categoryClass) elementDiv.classList.remove(categoryClass);
+                elementDiv.classList.add('placed');
             }
         });
+        return;
+    }
 
-        if (Object.keys(placedElements).length < fillGameElements.length) {
-            alert('คุณยังวางธาตุไม่ครบทุกตัว');
-            return;
-        }
+    // 5. แสดงผลลัพธ์สุดท้ายในช่อง Element Bank
+    if (allCorrect) {
+        elementBank.innerHTML = '<h2>เก่งมาก! ถูกต้องทั้งหมด! 🎉</h2>';
+    } else {
+        elementBank.innerHTML = '<h3>ผลลัพธ์: สีเขียวคือถูกต้อง, สีแดงคือผิด (พร้อมคำใบ้)</h3>';
+    }
 
-        if (allCorrect) {
-            elementBank.innerHTML = '<h2>เก่งมาก! ถูกต้องทั้งหมด! 🎉</h2>';
-        } else {
-            elementBank.innerHTML = '<h3>ผลลัพธ์: สีเขียวคือถูกต้อง, สีแดงคือผิด (พร้อมคำใบ้)</h3>';
-        }
-        checkAnswersBtn.disabled = true;
-    };
+    // 6. ปิดปุ่มตรวจคำตอบหลังจากการตรวจเสร็จสิ้น
+    checkAnswersBtn.disabled = true;
+};
 
     const backToSelectionFromFill = () => {
         fillGameScreen.classList.add('hidden');
@@ -674,6 +728,30 @@ document.addEventListener('DOMContentLoaded', () => {
         startGameBtn.textContent = '▶️ เริ่มเกม';
     };
 
+    // ===== NEW: Firebase Auth Logic =====
+    const auth = window.firebaseAuth.auth;
+    const provider = window.firebaseAuth.provider;
+    const signInWithPopup = window.firebaseAuth.signInWithPopup;
+    const onAuthStateChanged = window.firebaseAuth.onAuthStateChanged;
+    const signOut = window.firebaseAuth.signOut;
+
+    const signInWithGoogle = () => {
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                console.log("Signed in successfully!", result.user);
+                sidebar.classList.add('hidden');
+            }).catch((error) => {
+                console.error("Authentication failed:", error);
+            });
+    };
+
+    const signOutUser = () => {
+        signOut(auth).then(() => {
+            console.log("Signed out successfully!");
+        }).catch((error) => {
+            console.error("Sign out failed:", error);
+        });
+    };
 
 
     // ===== EVENT LISTENERS =====
@@ -786,6 +864,13 @@ document.addEventListener('DOMContentLoaded', () => {
     checkAnswersBtn.addEventListener('click', checkAnswers);
     fillBackToSelectionBtn.addEventListener('click', backToSelectionFromFill);
 
+    // NEW Listeners for sidebar and login
+    hamburgerBtn.addEventListener('click', () => sidebar.classList.remove('hidden'));
+    closeSidebarBtn.addEventListener('click', () => sidebar.classList.add('hidden'));
+    loginBtn.addEventListener('click', signInWithGoogle);
+    logoutBtn.addEventListener('click', signOutUser);
+
+
     // ===== INITIALIZATION =====
     const initializeApp = () => {
         if (!elements || elements.length === 0) {
@@ -795,7 +880,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         createPeriodicTable();
         createLegend();
-        // setupEventListeners(); // This line was a duplicate/unnecessary
 
         const savedTheme = localStorage.getItem('theme') || 'light';
         const savedGameMode = localStorage.getItem('gameMode') || 'symbol-to-name';
@@ -813,7 +897,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTheme(savedTheme);
         setGameMode(savedGameMode);
-        setCellSize(initialWidth, initialHeight); // Use the new logic to set initial size
+        setCellSize(initialWidth, initialHeight);
+
+        // NEW: Listen for auth state changes
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                // User is signed in.
+                profileContainer.classList.remove('hidden');
+                loginContainer.classList.add('hidden');
+                
+                usernameDisplay.textContent = user.displayName;
+                profilePic.src = user.photoURL;
+
+            } else {
+                // User is signed out.
+                profileContainer.classList.add('hidden');
+                loginContainer.classList.remove('hidden');
+            }
+        });
     };
 
     initializeApp();
