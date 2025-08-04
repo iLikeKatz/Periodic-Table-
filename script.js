@@ -530,39 +530,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ===== NEW: Custom Touch Handlers for Mobile =====
     const handleTouchStart = (e, source) => {
-        e.preventDefault(); // ป้องกันการเลื่อนหน้าจอ
-
+        e.preventDefault(); // Prevent scrolling
         const originalElement = e.currentTarget;
-        const touch = e.touches[0];
-
-        // --- จุดเปลี่ยนสำคัญ ---
-        // 1. สร้าง div ขึ้นมาใหม่ทั้งหมด แทนการ clone
-        const dragVisual = document.createElement('div');
-
-        // 2. กำหนดคลาสสำหรับสไตล์โดยเฉพาะ (เราจะไปสร้างคลาสนี้ใน CSS)
-        dragVisual.className = 'dragging-visual'; 
-        
-        // 3. คัดลอกแค่ข้อความ (สัญลักษณ์ธาตุ) มาใส่
-        dragVisual.textContent = originalElement.textContent;
-        // --- สิ้นสุดจุดเปลี่ยน ---
-
-        // กำหนดค่าต่างๆ ที่จำเป็นสำหรับการลาก
-        document.body.appendChild(dragVisual);
-        dragVisual.style.left = `${touch.clientX - originalElement.offsetWidth / 2}px`;
-        dragVisual.style.top = `${touch.clientY - originalElement.offsetHeight / 2}px`;
-        dragVisual.style.width = `${originalElement.offsetWidth}px`;
-        dragVisual.style.height = `${originalElement.offsetHeight}px`;
-
-        // เก็บข้อมูลสถานะการลาก
-        touchState.isDragging = true;
-        touchState.draggedElement = dragVisual; // ตัวที่ลากอยู่ตอนนี้คือ div ที่เราสร้างขึ้นมาใหม่
-        touchState.originalElement = originalElement; // ยังเก็บตัวดั้งเดิมไว้เพื่ออ้างอิง
+        touchState.originalElement = originalElement;
         touchState.source = source;
 
         if (source === 'grid') {
             touchState.originPlaceholder = originalElement.parentElement;
         }
-};
+
+        // Create a visual clone of the element to drag
+        const clone = originalElement.cloneNode(true);
+        
+        // --- จุดแก้ไขสุดท้ายที่ได้ผลแน่นอน ---
+        // ใช้ setProperty เพื่อบังคับใช้สไตล์ !important ทับของเดิม
+        clone.style.setProperty('background-color', '#cccccc', 'important');
+        clone.style.setProperty('color', '#333', 'important');
+        clone.style.opacity = '0.7';
+        // --- จบจุดแก้ไข ---
+
+        clone.style.position = 'absolute';
+        clone.style.zIndex = '1000';
+        clone.style.pointerEvents = 'none';
+        clone.style.width = `${originalElement.offsetWidth}px`;
+        clone.style.height = `${originalElement.offsetHeight}px`;
+        document.body.appendChild(clone);
+        touchState.draggedElement = clone;
+
+        const touch = e.touches[0];
+        clone.style.left = `${touch.clientX - clone.offsetWidth / 2}px`;
+        clone.style.top = `${touch.clientY - clone.offsetHeight / 2}px`;
+
+        touchState.isDragging = true;
+    };
+    
     const handleTouchMove = (e) => {
         if (!touchState.isDragging || !touchState.draggedElement) return;
         e.preventDefault();
