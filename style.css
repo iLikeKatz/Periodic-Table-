@@ -722,24 +722,45 @@ body.dark-mode #settings-btn:hover {
 }
 
 .dragging-visual {
-    /* --- สไตล์สำคัญสำหรับสีเทา --- */
-    background-color: #cccccc !important; /* สีเทา */
-    color: #333 !important;             /* สีตัวอักษร */
-    border: 1px solid #999;           /* เพิ่มขอบให้เห็นชัดขึ้น */
-
-    /* --- สไตล์อื่นๆ เพื่อให้แสดงผลถูกต้อง --- */
+    /* --- สไตล์หลัก ยังคงเดิม --- */
+    background-color: #cccccc !important;
+    color: #333 !important;
+    border: 1px solid #999;
     position: absolute;
     z-index: 1000;
-    pointer-events: none; /* เพื่อให้ตรวจจับ element ข้างใต้ได้ */
+    pointer-events: none;
     opacity: 0.8;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+
+    /* --- ส่วนสำคัญที่เพิ่มเข้ามาสำหรับการจัดเรียง --- */
     display: flex;
+    flex-direction: column; /* สั่งให้เรียงจากบนลงล่าง */
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    border-radius: 4px; /* ทำให้มุมมนเหมือนของเดิม */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    padding: 4px; /* เพิ่มช่องว่างภายในเล็กน้อย */
+    box-sizing: border-box; /* ป้องกันไม่ให้ padding ทำให้ขนาดเพี้ยน */
 }
 
+/* --- จัดสไตล์ให้องค์ประกอบย่อยๆ ที่อยู่ข้างใน --- */
+
+.dragging-visual .element-number {
+    font-size: 0.6em; /* ทำให้เลขอะตอมเล็กลง */
+    align-self: flex-start; /* จัดชิดซ้ายบน */
+    margin: -2px 0 0 2px; /* ขยับตำแหน่งนิดหน่อย */
+    opacity: 0.7;
+}
+
+.dragging-visual .element-symbol {
+    font-size: 1.2em; /* ทำให้สัญลักษณ์ตัวใหญ่เด่นขึ้น */
+    font-weight: bold;
+    line-height: 1; /* ลดระยะห่างบรรทัด */
+}
+
+.dragging-visual .element-name {
+    font-size: 0.6em; /* ทำให้ชื่อธาตุเล็กลง */
+    word-break: keep-all; /* ป้องกันการตัดคำแปลกๆ */
+}
 /* Container for the empty grid */
 
 
