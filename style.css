@@ -1,12 +1,11 @@
 /* --- Root Variables --- */
-
 :root {
-    /* NEW: Variables for table cell size, controlled by JS */
     --cell-width: 60px;
     --cell-height: 60px;
     --bg-color: #f0f2f5;
     --table-bg: #ffffff;
     --text-color: #212529;
+    --secondary-text-color: #6c757d;
     --primary-btn-bg: #007bff;
     --primary-btn-hover: #0056b3;
     --secondary-btn-bg: #6c757d;
@@ -15,11 +14,12 @@
     --card-back-text: #333;
     --border-color: #ccc;
     --sidebar-bg: #ffffff;
+    --success-color: #28a745;
+    --error-color: #dc3545;
 }
 
 
 /* --- Base Styles --- */
-
 body {
     font-family: 'IBM Plex Sans Thai', sans-serif;
     background-color: var(--bg-color);
@@ -29,23 +29,15 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-#selection-screen,
-#game-screen,
-#fill-game-screen {
-    /* Added fill-game-screen */
+#selection-screen, #game-screen, #fill-game-screen {
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
     text-align: center;
 }
 
-.hidden {
-    display: none !important;
-}
-
-h1 {
-    font-size: 2.2rem;
-}
+.hidden { display: none !important; }
+h1 { font-size: 2.2rem; }
 
 button {
     font-family: 'IBM Plex Sans Thai', sans-serif;
@@ -58,10 +50,7 @@ button {
     transition: background-color 0.2s;
 }
 
-#controls,
-#game-controls,
-#fill-game-controls {
-    /* Added fill-game-controls */
+#controls, #game-controls, #fill-game-controls {
     margin-bottom: 20px;
     display: flex;
     justify-content: center;
@@ -70,61 +59,21 @@ button {
     align-items: center;
 }
 
-#start-game-btn,
-#next-card-btn {
-    background-color: var(--primary-btn-bg);
-}
+#start-game-btn, #next-card-btn { background-color: var(--primary-btn-bg); }
+#start-game-btn:hover, #next-card-btn:hover { background-color: var(--primary-btn-hover); }
 
-#start-game-btn:hover,
-#next-card-btn:hover {
-    background-color: var(--primary-btn-hover);
-}
-
-#select-all-btn,
-#deselect-all-btn,
-#select-main-groups-btn,
-#flip-card-btn,
-#back-to-selection-btn {
-    background-color: var(--secondary-btn-bg);
-}
-
-#select-all-btn:hover,
-#deselect-all-btn:hover,
-#select-main-groups-btn:hover,
-#flip-card-btn:hover,
-#back-to-selection-btn:hover {
-    background-color: var(--secondary-btn-hover);
-}
-
-
-/* --- Checkbox Control --- */
-
-.checkbox-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.checkbox-control label {
-    cursor: pointer;
-}
+#select-all-btn, #deselect-all-btn, #select-main-groups-btn, #flip-card-btn, #back-to-selection-btn, #check-answers-btn, #fill-back-to-selection-btn { background-color: var(--secondary-btn-bg); }
+#select-all-btn:hover, #deselect-all-btn:hover, #select-main-groups-btn:hover, #flip-card-btn:hover, #back-to-selection-btn:hover, #check-answers-btn:hover, #fill-back-to-selection-btn:hover { background-color: var(--secondary-btn-hover); }
 
 
 /* --- Periodic Table --- */
-
-#periodic-table-container,
-#fill-periodic-table-container {
+#periodic-table-container, #fill-periodic-table-container {
     overflow-x: auto;
     padding-bottom: 15px;
 }
 
-
-/* MODIFIED: Both tables now use the CSS variables for size */
-
-#periodic-table,
-#fill-periodic-table {
+#periodic-table, #fill-periodic-table {
     display: grid;
-    /* Using variables for grid cell sizing */
     grid-template-columns: repeat(18, var(--cell-width));
     grid-auto-rows: var(--cell-height);
     gap: 5px;
@@ -132,11 +81,8 @@ button {
     background-color: var(--table-bg);
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    /* min-width is now implicitly set by the column widths */
     width: fit-content;
-    /* Important for container scrolling */
     margin: 0 auto;
-    /* Center the table if container is wider */
 }
 
 .element {
@@ -150,864 +96,157 @@ button {
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     font-size: 0.7rem;
+    box-sizing: border-box;
+    overflow: hidden;
 }
-
-.element:hover {
-    transform: scale(1.1);
-    z-index: 10;
-    border-color: #000;
-}
-
-.element.selected {
-    box-shadow: inset 0 0 0 3px var(--primary-btn-bg);
-    font-weight: bold;
-}
-
-.element .symbol {
-    font-family: 'Roboto', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-}
-
-.element .atomic-number {
-    align-self: flex-start;
-    padding-left: 4px;
-    font-size: 0.6rem;
+.element:hover { transform: scale(1.1); z-index: 10; border-color: #000; }
+.element.selected { box-shadow: inset 0 0 0 3px var(--primary-btn-bg); font-weight: bold; }
+.element .symbol { font-family: 'Roboto', sans-serif; font-size: 1.2rem; font-weight: 700; }
+.element .atomic-number { align-self: flex-start; padding-left: 4px; font-size: 0.6rem; }
+.element .name {
+    font-size: 0.65rem;
+    white-space: nowrap;
 }
 
 
 /* --- Element Colors --- */
-
-.alkali-metal {
-    background-color: #ffadad;
-}
-
-.alkaline-earth-metal {
-    background-color: #ffd6a5;
-}
-
-.lanthanide {
-    background-color: #fdffb6;
-}
-
-.actinide {
-    background-color: #caffbf;
-}
-
-.transition-metal {
-    background-color: #9bf6ff;
-}
-
-.post-transition-metal {
-    background-color: #a0c4ff;
-}
-
-.metalloid {
-    background-color: #bdb2ff;
-}
-
-.diatomic-nonmetal,
-.polyatomic-nonmetal {
-    background-color: #ffc6ff;
-}
-
-.noble-gas {
-    background-color: #f2c6de;
-}
-
+.alkali-metal { background-color: #ffadad; }
+.alkaline-earth-metal { background-color: #ffd6a5; }
+.lanthanide { background-color: #fdffb6; }
+.actinide { background-color: #caffbf; }
+.transition-metal { background-color: #9bf6ff; }
+.post-transition-metal { background-color: #a0c4ff; }
+.metalloid { background-color: #bdb2ff; }
+.diatomic-nonmetal, .polyatomic-nonmetal { background-color: #ffc6ff; }
+.noble-gas { background-color: #f2c6de; }
 
 /* --- Legend --- */
-
-#legend {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    margin: 20px auto;
-    max-width: 1000px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-}
-
-.legend-color-box {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-}
-
+#legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin: 20px auto; max-width: 1000px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+.legend-color-box { width: 20px; height: 20px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.2); }
 
 /* --- Flashcard --- */
+.flashcard-container { perspective: 1000px; width: 90vw; height: 55vw; margin: 20px auto; max-width: 500px; max-height: 300px; }
+.flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); border-radius: 15px; }
+.flashcard.flipped { transform: rotateY(180deg); }
+.card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
+.card-front { background: linear-gradient(45deg, #007bff, #0056b3); color: white; }
+.card-front-symbol { font-family: 'Roboto', sans-serif; font-size: 6rem; font-weight: bold; }
+.card-front-name { font-size: 3rem; font-weight: bold; }
+.card-back { background-color: var(--card-back-bg); color: var(--card-back-text); transform: rotateY(180deg); }
+.card-back h2 { margin: 0 0 10px 0; font-size: 2rem; color: var(--primary-btn-bg); }
+.card-back p { margin: 5px 0; font-size: 1.2rem; }
 
-.flashcard-container {
-    perspective: 1000px;
-    width: 90vw;
-    /* Use viewport width for responsiveness */
-    height: 55vw;
-    /* Maintain aspect ratio */
-    margin: 20px auto;
-    /* INCREASED max-width for larger desktop view */
-    max-width: 500px;
-    max-height: 300px;
-}
-
-.flashcard {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.6s;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    border-radius: 15px;
-}
-
-.flashcard.flipped {
-    transform: rotateY(180deg);
-}
-
-.card-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
-    text-align: center;
-}
-
-.card-front {
-    background: linear-gradient(45deg, #007bff, #0056b3);
-    color: white;
-}
-
-.card-front-symbol {
-    font-family: 'Roboto', sans-serif;
-    font-size: 6rem;
-    /* Increased base size */
-    font-weight: bold;
-}
-
-.card-front-name {
-    font-size: 3rem;
-    /* Increased base size */
-    font-weight: bold;
-}
-
-.card-back {
-    background-color: var(--card-back-bg);
-    color: var(--card-back-text);
-    transform: rotateY(180deg);
-}
-
-.card-back h2 {
-    margin: 0 0 10px 0;
-    font-size: 2rem;
-    /* Increased base size */
-    color: var(--primary-btn-bg);
-}
-
-.card-back p {
-    margin: 5px 0;
-    font-size: 1.2rem;
-    /* Increased base size */
-}
-
-
-/* --- Settings Button & Modal --- */
-
-#settings-container {
-    position: absolute;
-    top: 5px;
-    right: 0%;
-    z-index: 100;
-}
-
-#ins {
-    margin-top: 30px;
-}
-
-#ins2 {
-    margin-top: 30px;
-}
-
-body.dark-mode #settings-btn {
-    background-color: transparent;
-    padding: 8px 15px;
-    color: white;
-}
-
-#settings-btn {
-    background-color: transparent;
-    padding: 8px 15px;
-    color: rgb(20, 20, 20);
-}
-
-#settings-btn:hover {
-    background-color: var(--secondary-btn-hover);
-}
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    opacity: 1;
-    transition: opacity 0.3s ease;
-}
-
-.modal-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.modal-content {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 450px;
-    position: relative;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-}
-
-.modal-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    font-weight: bold;
-    color: #888;
-    cursor: pointer;
-}
-
-.modal-close:hover {
-    color: var(--text-color);
-}
-
-.modal-body .setting-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.modal-body .setting-item>span {
-    font-size: 1.1rem;
-    margin-right: 15px;
-}
-
-#theme-btn-group .theme-btn {
-    background-color: var(--secondary-btn-bg);
-}
-
-#theme-btn-group .theme-btn:hover {
-    background-color: var(--secondary-btn-hover);
-}
-
-#theme-btn-group .theme-btn.active {
-    background-color: var(--primary-btn-bg);
-    font-weight: bold;
-    box-shadow: inset 0 0 0 2px var(--primary-btn-hover);
-}
-
-#game-mode-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
-}
-
-.radio-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-input[type="radio"] {
-    accent-color: var(--primary-btn-bg);
-    width: 16px;
-    height: 16px;
-}
-
-
-/* === NEW Styles for Size Controls === */
-
-.setting-item.slider-control {
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.setting-item.slider-control>span {
-    margin-bottom: 8px;
-}
-
-.slider-container {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: 15px;
-}
-
-input[type="range"] {
-    flex-grow: 1;
-    accent-color: var(--primary-btn-bg);
-}
-
-#reset-size-btn {
-    width: 100%;
-    margin-top: 10px;
-    background-color: #ffc107;
-    color: #212529;
-    font-weight: 500;
-}
-
-#reset-size-btn:hover {
-    background-color: #e0a800;
-}
-
+/* --- Settings & Modals --- */
+#settings-container { position: absolute; top: 15px; right: 15px; z-index: 100; }
+#settings-btn { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 15px; }
+#settings-btn:hover { background-color: var(--secondary-btn-hover); color: white; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 1; transition: opacity 0.3s ease; }
+.modal-overlay.hidden { opacity: 0; pointer-events: none; }
+.modal-content { background-color: var(--bg-color); color: var(--text-color); padding: 25px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); width: 90%; max-width: 450px; position: relative; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
+.modal-header h2 { margin: 0; font-size: 1.5rem; }
+.modal-close { background: none; border: none; font-size: 2rem; font-weight: bold; color: #888; cursor: pointer; }
+.modal-close:hover { color: var(--text-color); }
+.modal-body .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; flex-wrap: wrap; gap: 10px; }
+#theme-btn-group .theme-btn { background-color: var(--secondary-btn-bg); }
+#theme-btn-group .theme-btn.active { background-color: var(--primary-btn-bg); }
+.slider-container { display: flex; align-items: center; width: 100%; gap: 15px; }
+input[type="range"] { flex-grow: 1; accent-color: var(--primary-btn-bg); }
+#reset-size-btn { width: 100%; margin-top: 10px; background-color: #ffc107; color: #212529; }
 
 /* --- Dark Mode --- */
-
 body.dark-mode {
-    --bg-color: #121212;
-    --table-bg: #1e1e1e;
-    --text-color: #e0e0e0;
-    --card-back-bg: #2a2a2a;
-    --card-back-text: #e0e0e0;
-    --border-color: #444;
-    --sidebar-bg: #1e1e1e;
+    --bg-color: #121212; --table-bg: #1e1e1e; --text-color: #e0e0e0;
+    --secondary-text-color: #a0a0a0; --card-back-bg: #2a2a2a; --card-back-text: #e0e0e0;
+    --border-color: #444; --sidebar-bg: #1e1e1e;
+}
+body.dark-mode .element { color: #212529; }
+
+/* --- Custom Groups & Game Choice --- */
+#custom-groups-btn { background-color: #ffc107; color: #212529; }
+#custom-groups-list { list-style-type: none; padding: 0; margin: 0 0 20px 0; max-height: 300px; overflow-y: auto; }
+#custom-groups-list li { display: flex; justify-content: space-between; align-items: center; padding: 12px 8px; border-bottom: 1px solid var(--border-color); gap: 10px; }
+#custom-groups-list .group-info { text-align: left; flex-grow: 1; }
+#custom-groups-list .group-name { font-weight: 500; }
+#custom-groups-list .best-time { font-size: 0.8rem; color: var(--secondary-text-color); display: block; }
+#custom-groups-list .group-actions { display: flex; gap: 8px; flex-shrink: 0; }
+#custom-groups-list .group-actions button { padding: 5px 10px; font-size: 0.9rem; }
+.use-group-btn { background-color: var(--primary-btn-bg); }
+.delete-group-btn { background-color: var(--error-color); }
+#create-new-group-btn { background-color: var(--secondary-btn-bg); width: 100%; padding: 12px; }
+#save-group-modal input { width: calc(100% - 22px); padding: 10px; border: 1px solid var(--border-color); background-color: var(--table-bg); color: var(--text-color); }
+#save-new-group-btn { background-color: var(--primary-btn-bg); width: 100%; margin-top: 10px; }
+#game-choice-buttons { display: flex; justify-content: space-around; gap: 10px; }
+#game-choice-buttons button { width: 48%; background-color: var(--primary-btn-bg); }
+
+/* ===== Fill-in-the-blanks Game Styles ===== */
+#fill-game-timer-container {
+    display: flex; justify-content: center; align-items: center; gap: 10px; margin: -10px 0 15px 0;
+}
+#fill-game-timer {
+    font-size: 1.8rem; font-weight: 700; color: var(--primary-btn-bg); font-family: 'Roboto', sans-serif;
+}
+#element-bank-container { margin: 20px 0; padding: 15px; background-color: var(--table-bg); border-radius: 10px; }
+#element-bank { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; min-height: 100px; }
+.draggable-element { border-radius: 4px; padding: 5px 2px; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 80px; height: 80px; cursor: grab; background-color: var(--secondary-btn-bg); color: white; box-sizing: border-box; }
+.draggable-element .symbol { font-size: 1.5rem; }
+.draggable-element .name { font-size: 0.8rem; white-space: nowrap; }
+.placeholder-element { border: 1px dashed var(--border-color); border-radius: 4px; transition: background-color 0.2s; }
+.placeholder-element.drag-over { background-color: var(--primary-btn-hover); border-style: solid; }
+.element.placed { background-color: #cccccc !important; color: #333 !important; }
+.placeholder-element .element { margin: 0; width: 100%; height: 100%; cursor: grab; }
+.element.dragging { opacity: 0.5; }
+.correct-placement { border: 3px solid var(--success-color) !important; background-color: #d4edda; }
+.incorrect-placement { border: 3px solid var(--error-color) !important; background-color: #f8d7da; position: relative; }
+.incorrect-placement::after { content: attr(data-correct-symbol); position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); background-color: #ffc107; color: #333; padding: 3px 6px; border-radius: 3px; font-size: 0.9rem; z-index: 20; white-space: nowrap; }
+
+/* --- Hamburger, Sidebar, Login Styles --- */
+#menu-container { position: absolute; top: 15px; left: 15px; z-index: 100; }
+#hamburger-btn { background-color: transparent; font-size: 1.8rem; color: var(--text-color); padding: 0; border: none; }
+#hamburger-btn:hover { color: var(--primary-btn-bg); }
+#sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100%; background-color: var(--sidebar-bg); box-shadow: 2px 0 5px rgba(0,0,0,0.2); z-index: 1100; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; color: var(--text-color); transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+#sidebar:not(.hidden) { transform: translateX(0); }
+#close-sidebar-btn { position: absolute; top: 10px; right: 15px; font-size: 2rem; background: none; border: none; color: #888; }
+#profile-container { text-align: center; margin-top: 40px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+#profile-pic { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--primary-btn-bg); }
+#username-display { margin: 0; font-size: 1.2rem; }
+.edit-profile-button { background: none; border: none; color: var(--primary-btn-bg); text-decoration: underline; font-size: 0.9rem; padding: 0; margin-top: -10px; }
+#best-times-container {
+    width: 100%; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); text-align: left;
+}
+#best-times-container h4 { margin: 0 0 10px 0; font-size: 1rem; }
+#best-times-container p { margin: 5px 0; font-size: 0.9rem; }
+#best-times-container span { font-weight: bold; color: var(--primary-btn-bg); }
+#logout-btn { background-color: var(--secondary-btn-bg); width: 100%; }
+#login-container { margin-top: 40px; text-align: center; }
+#login-btn { background-color: #4285F4; }
+#edit-profile-modal .profile-edit-item { flex-direction: column; align-items: flex-start; }
+#save-profile-btn { background-color: var(--primary-btn-bg); width: 100%; margin-top: 10px; }
+#profile-update-feedback.success { color: var(--success-color); }
+#profile-update-feedback.error { color: var(--error-color); }
+
+#new-username-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
 }
 
-body.dark-mode #periodic-table {
-    border-color: #333;
+#new-username-input:focus {
+  border-color: #3b82f6; /* สีฟ้า */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  background-color: #fff;
 }
+    
 
-body.dark-mode .element {
-    color: #212529;
-}
 
-
-/* Keep text on elements readable */
-
-body.dark-mode #settings-btn:hover {
-    background-color: #444;
-}
-
-#custom-groups-btn {
-    background-color: #ffc107;
-    /* A different color to stand out */
-    color: #212529;
-}
-
-#custom-groups-btn:hover {
-    background-color: #e0a800;
-}
-
-
-/* Custom Groups List in Modal */
-
-#custom-groups-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0 0 20px 0;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-#custom-groups-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 8px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-#custom-groups-list li:last-child {
-    border-bottom: none;
-}
-
-#custom-groups-list .group-name {
-    font-weight: 500;
-}
-
-#custom-groups-list .group-actions button {
-    margin-left: 8px;
-    padding: 5px 10px;
-    font-size: 0.9rem;
-}
-
-.use-group-btn {
-    background-color: var(--primary-btn-bg);
-}
-
-.use-group-btn:hover {
-    background-color: var(--primary-btn-hover);
-}
-
-.delete-group-btn {
-    background-color: #dc3545;
-    /* Red for delete */
-}
-
-.delete-group-btn:hover {
-    background-color: #c82333;
-}
-
-#custom-groups-controls {
-    text-align: center;
-    margin-top: 20px;
-}
-
-#create-new-group-btn {
-    background-color: var(--secondary-btn-bg);
-    width: 100%;
-    padding: 12px;
-}
-
-#create-new-group-btn:hover {
-    background-color: var(--secondary-btn-hover);
-}
-
-
-/* Save Group Modal */
-
-#save-group-modal .modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-#new-group-name-input {
-    padding: 10px;
-    font-size: 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    background-color: var(--table-bg);
-    color: var(--text-color);
-    font-family: 'IBM Plex Sans Thai', sans-serif;
-}
-
-#save-new-group-btn {
-    background-color: var(--primary-btn-bg);
-    padding: 12px;
-}
-
-#save-new-group-btn:hover {
-    background-color: var(--primary-btn-hover);
-}
-
-
-/* ===== NEW STYLES for Fill-in-the-blanks Game ===== */
-
-
-/* --- Game Choice Modal --- */
-
-#game-choice-buttons {
-    display: flex;
-    justify-content: space-around;
-    padding: 20px 0;
-    gap: 10px;
-}
-
-#game-choice-buttons button {
-    padding: 15px;
-    font-size: 1.1rem;
-    width: 48%;
-    background-color: var(--primary-btn-bg);
-}
-
-#game-choice-buttons button:hover {
-    background-color: var(--primary-btn-hover);
-}
-
-
-/* --- Fill in the Blanks Game Screen --- */
-
-#element-bank-container {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: var(--table-bg);
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-#element-bank {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100px;
-    /* Ensure it has a height */
-}
-
-#element-bank .element {
-    background-color: #cccccc; /* สีเทา */
-    color: #333;
-}
-
-
-/* Style for the element the user needs to place */
-
-.draggable-element {
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    padding: 5px 2px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 0.7rem;
-    width: 80px;
-    /* Fixed size for consistency */
-    height: 80px;
-    cursor: grab;
-    transition: all 0.2s ease-in-out;
-}
-
-.draggable-element:active {
-    cursor: grabbing;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.draggable-element .symbol {
-    font-family: 'Roboto', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-
-.draggable-element .atomic-number {
-    align-self: flex-start;
-    padding-left: 4px;
-    font-size: 0.8rem;
-}
-
-.element.dragging {
-  opacity: 0.5;
-  background-color: #cccccc !important;
-  color: #333 !important;
-}
-
-.dragging-visual {
-    /* --- สไตล์หลัก ยังคงเดิม --- */
-    background-color: #cccccc !important;
-    color: #333 !important;
-    border: 1px solid #999;
-    position: absolute;
-    z-index: 1000;
-    pointer-events: none;
-    opacity: 0.8;
-    border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-
-    /* --- ส่วนสำคัญที่เพิ่มเข้ามาสำหรับการจัดเรียง --- */
-    display: flex;
-    flex-direction: column; /* สั่งให้เรียงจากบนลงล่าง */
-    align-items: center;
-    justify-content: center;
-    padding: 4px; /* เพิ่มช่องว่างภายในเล็กน้อย */
-    box-sizing: border-box; /* ป้องกันไม่ให้ padding ทำให้ขนาดเพี้ยน */
-}
-
-/* --- จัดสไตล์ให้องค์ประกอบย่อยๆ ที่อยู่ข้างใน --- */
-
-.dragging-visual .element-number {
-    font-size: 0.6em; /* ทำให้เลขอะตอมเล็กลง */
-    align-self: flex-start; /* จัดชิดซ้ายบน */
-    margin: -2px 0 0 2px; /* ขยับตำแหน่งนิดหน่อย */
-    opacity: 0.7;
-}
-
-.dragging-visual .element-symbol {
-    font-size: 1.2em; /* ทำให้สัญลักษณ์ตัวใหญ่เด่นขึ้น */
-    font-weight: bold;
-    line-height: 1; /* ลดระยะห่างบรรทัด */
-}
-
-.dragging-visual .element-name {
-    font-size: 0.6em; /* ทำให้ชื่อธาตุเล็กลง */
-    word-break: keep-all; /* ป้องกันการตัดคำแปลกๆ */
-}
-/* Container for the empty grid */
-
-
-/* Individual empty cells in the grid */
-
-.placeholder-element {
-    border: 1px dashed var(--border-color);
-    /* ลดความหนาเส้นขอบให้เท่ากับธาตุปกติ */
-    border-radius: 4px;
-    transition: background-color 0.2s, border-style 0.2s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-sizing: border-box;
-    /* สำคัญมาก: ทำให้ border ไม่ไปเพิ่มขนาดของกล่อง */
-}
-
-
-/* NEW: Add this class when a placeholder has an element inside */
-
-
-/* สไตล์สำหรับช่องที่ "มี" ธาตุวางอยู่ */
-
-.placeholder-element.has-element {
-    border-color: transparent;
-    /* ซ่อนเส้นประเมื่อมีธาตุอยู่ข้างใน */
-    padding: 0;
-    background-color: transparent;
-}
-
-.placeholder-element.drag-over {
-    background-color: var(--primary-btn-hover);
-    border-style: solid;
-}
-
-
-/* The element once it's been dropped */
-
-
-/* The element once it's been dropped (MODIFIED) */
-
-
-/* จัดการให้ธาตุที่นำมาวาง มีหน้าตาเหมือนหน้าแรกเป๊ะๆ */
-
-.element.placed {
-    background-color: #cccccc; /* สีเทากลางๆ */
-    color: #000000; /* ทำให้ตัวอักษรเป็นสีขาว จะได้อ่านง่าย */
-}
-
-.placeholder-element .element {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    cursor: grab;
-    /* เปลี่ยนเป็น grab เพื่อให้รู้ว่าลากย้ายที่ได้ */
-    border-radius: 4px;
-    /* ต้องกำหนดซ้ำเพื่อให้แสดงผลถูกต้อง */
- }
-
-.placeholder-element .element:hover {
-    transform: none;
-    z-index: 1;
-    border-color: rgba(0, 0, 0, 0.2);
-}
-
-
-/* Styles for feedback after checking answers */
-
-.correct-placement {
-    border: 3px solid #28a745 !important;
-    /* Green for correct */
-    background-color: #d4edda;
-}
-
-.incorrect-placement {
-    border: 3px solid #dc3545 !important;
-    /* Red for incorrect */
-    background-color: #f8d7da;
-    position: relative;
-    /* For positioning the correction hint */
-}
-
-
-/* Hint showing the correct symbol on an incorrect placement */
-
-.incorrect-placement::after {
-    content: attr(data-correct-symbol);
-    position: absolute;
-    bottom: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #ffc107;
-    color: #333;
-    padding: 3px 6px;
-    border-radius: 3px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    z-index: 20;
-    white-space: nowrap;
-}
-
-#fill-game-controls {
-    margin-top: 30px;
-}
-
-#check-answers-btn,
-#fill-back-to-selection-btn {
-    background-color: var(--secondary-btn-bg);
-}
-
-#check-answers-btn:hover,
-#fill-back-to-selection-btn:hover {
-    background-color: var(--secondary-btn-hover);
-}
-
-/* --- NEW: Hamburger, Sidebar, Login Styles --- */
-
-#menu-container {
-    position: absolute;
-    top: 5px;
-    left: 10px;
-    z-index: 100;
-}
-
-#hamburger-btn {
-    background-color: transparent;
-    font-size: 1.8rem;
-    color: var(--text-color);
-    padding: 8px 15px;
-}
-
-#hamburger-btn:hover {
-    background-color: var(--secondary-btn-hover);
-    color: white;
-}
-
-#sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    height: 100%;
-    background-color: var(--sidebar-bg);
-    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-    z-index: 1100;
-    padding: 20px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    color: var(--text-color);
-}
-
-#close-sidebar-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 2rem;
-    background: none;
-    border: none;
-    color: #888;
-    cursor: pointer;
-}
-
-#close-sidebar-btn:hover {
-    color: var(--text-color);
-}
-
-#profile-container {
-    text-align: center;
-    margin-top: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
-
-#profile-pic {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 10px;
-    border: 2px solid var(--primary-btn-bg);
-}
-
-#username-display {
-    margin: 0;
-    font-size: 1.2rem;
-}
-
-#login-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 40px;
-}
-
-#login-btn {
-    background-color: #4285F4; /* Google Blue */
-    width: 100%;
-}
-
-#login-btn:hover {
-    background-color: #357ae8;
-}
-
-#logout-btn {
-    background-color: var(--secondary-btn-bg);
-    width: 100%;
-}
-
-#logout-btn:hover {
-    background-color: var(--secondary-btn-hover);
-}
-
-
-/* --- Responsive Design (UPDATED SECTION) --- */
-
-
-/* Tablets and smaller desktops (<= 1024px) */
-
-@media (max-width: 1024px) {
-    h1 {
-        font-size: 2rem;
-    }
-    .flashcard-container {
-        max-width: 450px;
-        max-height: 270px;
-    }
-    .card-front-symbol {
-        font-size: 5rem;
-    }
-    .card-front-name {
-        font-size: 2.5rem;
-    }
-    .card-back h2 {
-        font-size: 1.8rem;
-    }
-    .card-back p {
-        font-size: 1.1rem;
-    }
-}
-
-
-/* Mobile devices (<= 768px) */
-
+/* --- Responsive Design --- */
 @media (max-width: 768px) {
     body {
         padding: 10px;

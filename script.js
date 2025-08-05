@@ -1,7 +1,9 @@
+
+
 document.addEventListener('DOMContentLoaded', () => {
+    
 
     const elements = [
-        // ... (ข้อมูลธาตุทั้งหมดเหมือนเดิม ไม่มีการเปลี่ยนแปลง) ...
         { "number": 1, "symbol": "H", "name": "ไฮโดรเจน", "mass": 1.008, "category": "diatomic-nonmetal", "y": 1, "x": 1 },
         { "number": 3, "symbol": "Li", "name": "ลิเทียม", "mass": 6.94, "category": "alkali-metal", "y": 2, "x": 1 },
         { "number": 11, "symbol": "Na", "name": "โซเดียม", "mass": 22.990, "category": "alkali-metal", "y": 3, "x": 1 },
@@ -121,25 +123,16 @@ document.addEventListener('DOMContentLoaded', () => {
         { "number": 102, "symbol": "No", "name": "โนเบเลียม", "mass": 259, "category": "actinide", "y": 10, "x": 16 },
         { "number": 103, "symbol": "Lr", "name": "ลอว์เรนเซียม", "mass": 266, "category": "actinide", "y": 10, "x": 17 }
     ];
-
     const categories = {
-        "alkali-metal": "โลหะแอลคาไล",
-        "alkaline-earth-metal": "โลหะแอลคาไลน์เอิร์ท",
-        "lanthanide": "แลนทาไนด์",
-        "actinide": "แอกทิไนด์",
-        "transition-metal": "โลหะแทรนซิชัน",
-        "post-transition-metal": "โลหะหลังแทรนซิชัน",
-        "metalloid": "ธาตุกึ่งโลหะ",
-        "diatomic-nonmetal": "อโลหะ (ไดอะตอม)",
-        "polyatomic-nonmetal": "อโลหะ (พอลิอะตอม)",
+        "alkali-metal": "โลหะแอลคาไล", "alkaline-earth-metal": "โลหะแอลคาไลน์เอิร์ท", "lanthanide": "แลนทาไนด์",
+        "actinide": "แอกทิไนด์", "transition-metal": "โลหะแทรนซิชัน", "post-transition-metal": "โลหะหลังแทรนซิชัน",
+        "metalloid": "ธาตุกึ่งโลหะ", "diatomic-nonmetal": "อโลหะ (ไดอะตอม)", "polyatomic-nonmetal": "อโลหะ (พอลิอะตอม)",
         "noble-gas": "แก๊สมีสกุล",
     };
 
-    // --- NEW: Default Size Constants ---
     const DESKTOP_DEFAULT_CELL_SIZE = 65;
     const MOBILE_DEFAULT_CELL_SIZE = 52;
 
-    // --- DOM Element References ---
     const selectionScreen = document.getElementById('selection-screen');
     const gameScreen = document.getElementById('game-screen');
     const periodicTable = document.getElementById('periodic-table');
@@ -179,8 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeSaveGroupModalBtn = document.getElementById('close-save-group-modal-btn');
     const newGroupNameInput = document.getElementById('new-group-name-input');
     const saveNewGroupBtn = document.getElementById('save-new-group-btn');
-
-    // ===== NEW: Sidebar and Login References =====
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const sidebar = document.getElementById('sidebar');
     const closeSidebarBtn = document.getElementById('close-sidebar-btn');
@@ -190,33 +181,99 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
     const profilePic = document.getElementById('profile-pic');
     const usernameDisplay = document.getElementById('username-display');
-
-    // ===== NEW: Table Size Control References =====
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    const editProfileModal = document.getElementById('edit-profile-modal');
+    const closeEditProfileModalBtn = document.getElementById('close-edit-profile-modal-btn');
+    const newUsernameInput = document.getElementById('new-username-input');
+    const saveProfileBtn = document.getElementById('save-profile-btn');
+    const profileUpdateFeedback = document.getElementById('profile-update-feedback');
     const cellWidthSlider = document.getElementById('cell-width-slider');
     const cellWidthValue = document.getElementById('cell-width-value');
     const cellHeightSlider = document.getElementById('cell-height-slider');
     const cellHeightValue = document.getElementById('cell-height-value');
-    const resetSizeBtn = document.getElementById('reset-size-btn'); // New button reference
+    const resetSizeBtn = document.getElementById('reset-size-btn');
 
-    // ===== STATE =====
+    const fillGameTimer = document.getElementById('fill-game-timer');
+    const bestTimeAllSpan = document.getElementById('best-time-all');
+    const bestTimeMainSpan = document.getElementById('best-time-main');
+
     let selectedElementsData = [];
     let currentCardIndex = 0;
     let fillGameElements = [];
     let currentFillElementIndex = 0;
     let placedElements = {};
     let isCreatingGroup = false;
+    let touchState = { isDragging: false, draggedElement: null, originalElement: null, source: null, originPlaceholder: null };
+    let gameTimerInterval = null;
+    let gameStartTime = 0;
+    let userBestTimes = {};
+    let currentGameModeKey = null;
+    let lastSelectionMode = null;
 
-    // ===== NEW: State for Touch Drag & Drop =====
-    let touchState = {
-        isDragging: false,
-        draggedElement: null,
-        originalElement: null,
-        source: null,
-        originPlaceholder: null,
+    const { auth, provider, signInWithPopup, onAuthStateChanged, signOut, updateProfile } = window.firebaseAuth;
+    const { db, doc, getDoc, setDoc } = window.firebaseDb;
+
+    const formatTime = (seconds) => {
+        if (seconds === null || typeof seconds === 'undefined') return 'N/A';
+        const floorSeconds = Math.floor(seconds);
+        const min = String(Math.floor(floorSeconds / 60)).padStart(2, '0');
+        const sec = String(floorSeconds % 60).padStart(2, '0');
+        return `${min}:${sec}`;
     };
 
+    const startTimer = () => {
+        if (gameTimerInterval) clearInterval(gameTimerInterval);
+        gameStartTime = Date.now();
+        fillGameTimer.textContent = '00:00';
+        gameTimerInterval = setInterval(() => {
+            const elapsedTime = (Date.now() - gameStartTime) / 1000;
+            fillGameTimer.textContent = formatTime(elapsedTime);
+        }, 1000);
+    };
 
-    // ===== SETTINGS LOGIC, SETUP LOGIC, etc. =====
+    const stopTimer = () => {
+        clearInterval(gameTimerInterval);
+        gameTimerInterval = null;
+        return (Date.now() - gameStartTime) / 1000;
+    };
+
+    const fetchUserBestTimes = async (userId) => {
+        if (!userId) return;
+        const userDocRef = doc(db, 'userBestTimes', userId);
+        try {
+            const docSnap = await getDoc(userDocRef);
+            userBestTimes = docSnap.exists() && docSnap.data().bestTimes ? docSnap.data().bestTimes : {};
+        } catch (error) {
+            console.error("Error fetching best times:", error);
+            userBestTimes = {};
+        }
+        updateBestTimesUI();
+    };
+
+    const updateUserBestTime = async (userId, gameKey, newTime) => {
+        if (!userId || !gameKey) return;
+        const currentBest = userBestTimes[gameKey] || Infinity;
+        if (newTime < currentBest) {
+            userBestTimes[gameKey] = newTime;
+            const userDocRef = doc(db, 'userBestTimes', userId);
+            try {
+                await setDoc(userDocRef, { bestTimes: userBestTimes }, { merge: true });
+                console.log(`New best time for ${gameKey}: ${newTime}`);
+                updateBestTimesUI();
+            } catch (error) {
+                console.error("Error updating best time:", error);
+            }
+        }
+    };
+
+    const updateBestTimesUI = () => {
+        bestTimeAllSpan.textContent = formatTime(userBestTimes.all_elements);
+        bestTimeMainSpan.textContent = formatTime(userBestTimes.main_groups);
+        if (!customGroupsModal.classList.contains('hidden')) {
+            populateCustomGroupsModal();
+        }
+    };
+
     const setTheme = (theme) => {
         document.body.className = `${theme}-mode`;
         lightModeBtn.classList.toggle('active', theme === 'light');
@@ -229,62 +286,20 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('gameMode', mode);
     };
 
-    // --- UPDATED: Table Cell Size Function ---
     const setCellSize = (width, height) => {
-        // Ensure values are numbers
         const w = Number(width);
         const h = Number(height);
-
-        // Update CSS variables
         document.documentElement.style.setProperty('--cell-width', `${w}px`);
         document.documentElement.style.setProperty('--cell-height', `${h}px`);
-
-        // Update slider UI
         cellWidthSlider.value = w;
         cellWidthValue.textContent = `${w}px`;
         cellHeightSlider.value = h;
         cellHeightValue.textContent = `${h}px`;
-
-        // Save to localStorage
         localStorage.setItem('customCellWidth', w);
         localStorage.setItem('customCellHeight', h);
     };
 
-    // --- Event Listeners for NEW controls ---
-    cellWidthSlider.addEventListener('input', (e) => {
-        const newWidth = e.target.value;
-        const currentHeight = cellHeightSlider.value;
-        setCellSize(newWidth, currentHeight); // Use the function to update everything
-    });
-
-    cellHeightSlider.addEventListener('input', (e) => {
-        const newHeight = e.target.value;
-        const currentWidth = cellWidthSlider.value;
-        setCellSize(currentWidth, newHeight); // Use the function to update everything
-    });
-
-    // --- NEW: Reset Button Logic ---
-    resetSizeBtn.addEventListener('click', () => {
-        // Check if the viewport matches mobile size
-        const isMobile = window.matchMedia("(max-width: 768px)").matches;
-        const defaultSize = isMobile ? MOBILE_DEFAULT_CELL_SIZE : DESKTOP_DEFAULT_CELL_SIZE;
-
-        setCellSize(defaultSize, defaultSize);
-
-        // Optional: remove from storage so the next page load also uses the default
-        localStorage.removeItem('customCellWidth');
-        localStorage.removeItem('customCellHeight');
-    });
-
-    settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
-    closeModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
-    settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.add('hidden'); });
-    lightModeBtn.addEventListener('click', () => setTheme('light'));
-    darkModeBtn.addEventListener('click', () => setTheme('dark'));
-    gameModeRadios.forEach(radio => radio.addEventListener('change', (e) => setGameMode(e.target.value)));
-
     const createPeriodicTable = () => {
-        // ... (โค้ดส่วนนี้เหมือนเดิม)
         elements.forEach(el => {
             const elDiv = document.createElement('div');
             elDiv.className = `element ${el.category}`;
@@ -292,13 +307,15 @@ document.addEventListener('DOMContentLoaded', () => {
             elDiv.style.gridColumn = el.x;
             elDiv.dataset.number = el.number;
             elDiv.innerHTML = `<div class="atomic-number">${el.number}</div><div class="symbol">${el.symbol}</div><div class="name">${el.name}</div>`;
-            elDiv.addEventListener('click', () => elDiv.classList.toggle('selected'));
+            elDiv.addEventListener('click', () => {
+                elDiv.classList.toggle('selected');
+                lastSelectionMode = null;
+            });
             periodicTable.appendChild(elDiv);
         });
     };
 
     const createLegend = () => {
-        // ... (โค้ดส่วนนี้เหมือนเดิม)
         Object.entries(categories).forEach(([key, value]) => {
             if (!document.querySelector(`.legend-item .${key}`)) {
                 const legendItem = document.createElement('div');
@@ -309,11 +326,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // ... (ส่วนที่เหลือของไฟล์ script.js ทั้งหมดไม่มีการเปลี่ยนแปลง)
-    // ... (All remaining code for game logic, custom groups, etc. is unchanged) ...
-
     const prepareGame = () => {
-        if (isCreatingGroup) return; // Prevent starting game while creating group
+        if (isCreatingGroup) return;
         const selectedDivs = document.querySelectorAll('.element.selected');
         if (selectedDivs.length === 0) {
             alert('กรุณาเลือกธาตุอย่างน้อย 1 ธาตุ!');
@@ -325,6 +339,16 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         selectedElementsData = [...commonSelectedData];
         fillGameElements = [...commonSelectedData];
+
+        if (lastSelectionMode === 'all') {
+            currentGameModeKey = 'all_elements';
+        } else if (lastSelectionMode === 'main') {
+            currentGameModeKey = 'main_groups';
+        } else if (lastSelectionMode && lastSelectionMode.startsWith('custom_')) {
+            currentGameModeKey = lastSelectionMode.replace('custom_', '');
+        } else {
+            currentGameModeKey = null;
+        }
 
         gameChoiceModal.classList.remove('hidden');
     };
@@ -370,9 +394,6 @@ document.addEventListener('DOMContentLoaded', () => {
         selectionScreen.classList.remove('hidden');
     };
 
-
-    // ===== Fill-in-the-blanks Game Logic (UPDATED FOR TOUCH) =====
-
     const startFillTheBlanksGame = () => {
         selectionScreen.classList.add('hidden');
         fillGameScreen.classList.remove('hidden');
@@ -385,53 +406,114 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         createEmptyGrid();
         displayNextFillElement();
+        startTimer();
     };
 
+    const checkAnswers = () => {
+        document.querySelectorAll('.placeholder-element').forEach(p => {
+            p.classList.remove('correct-placement', 'incorrect-placement');
+            p.removeAttribute('data-correct-symbol');
+        });
 
-    /**
-     * UPDATED: This function is now the single source of truth for placing an element,
-     * called by both mouse drop and touch end.
-     */
+        let allCorrect = true;
+        document.querySelectorAll('.placeholder-element:has(.element)').forEach(placeholder => {
+            const droppedElementNumber = placeholder.querySelector('.element').dataset.number;
+            const correctElement = elements.find(el => el.number == droppedElementNumber);
+            const placedX = parseInt(placeholder.dataset.x);
+            const placedY = parseInt(placeholder.dataset.y);
+            if (correctElement.x === placedX && correctElement.y === placedY) {
+                placeholder.classList.add('correct-placement');
+                const elementDiv = placeholder.querySelector('.element');
+                if (elementDiv) {
+                    elementDiv.classList.remove('placed');
+                    elementDiv.classList.add(correctElement.category);
+                }
+            } else {
+                allCorrect = false;
+                placeholder.classList.add('incorrect-placement');
+                const elementThatShouldBeHere = elements.find(el => el.x === placedX && el.y === placedY);
+                placeholder.dataset.correctSymbol = elementThatShouldBeHere ? `ควรเป็น ${elementThatShouldBeHere.symbol}` : 'ช่องนี้ว่าง';
+            }
+        });
+
+        if (Object.keys(placedElements).length < fillGameElements.length) {
+            alert('คุณยังวางธาตุไม่ครบทุกตัว');
+            document.querySelectorAll('.placeholder-element').forEach(p => {
+                p.classList.remove('correct-placement', 'incorrect-placement');
+                p.removeAttribute('data-correct-symbol');
+                const elementDiv = p.querySelector('.element');
+                if (elementDiv && !elementDiv.classList.contains('placed')) {
+                    const categoryClass = Array.from(elementDiv.classList).find(c => categories[c]);
+                    if(categoryClass) elementDiv.classList.remove(categoryClass);
+                    elementDiv.classList.add('placed');
+                }
+            });
+            return;
+        }
+
+        if (allCorrect) {
+            const elapsedTime = stopTimer();
+            let resultHTML = `<h2>เก่งมาก! ถูกต้องทั้งหมด! 🎉</h2>`;
+
+            // --- ส่วนที่เพิ่มเข้ามา ---
+            // ตรวจสอบว่า checkbox "สุ่มลำดับการ์ด" ถูกติ้กอยู่หรือไม่
+            if (randomOrderCheckbox.checked) {
+                resultHTML += `<p>ใช้เวลา: ${formatTime(elapsedTime)}</p>`;
+                const user = auth.currentUser;
+                // บันทึกเวลาเฉพาะเมื่อสุ่มลำดับเท่านั้น
+                if (user && currentGameModeKey) {
+                    updateUserBestTime(user.uid, currentGameModeKey, elapsedTime);
+                }
+            } else {
+                // ถ้าไม่ได้สุ่มลำดับ จะไม่แสดงเวลาและไม่บันทึก
+                resultHTML += `<p>(โหมดไม่สุ่มลำดับ จะไม่มีการบันทึกสถิติเวลา)</p>`;
+                console.log("Time not recorded: Shuffle mode was disabled.");
+            }
+            elementBank.innerHTML = resultHTML;
+            // --- จบส่วนที่เพิ่มเข้ามา ---
+
+        } else {
+            elementBank.innerHTML = '<h3>ผลลัพธ์: สีเขียวคือถูกต้อง, สีแดงคือผิด (พร้อมคำใบ้)</h3>';
+        }
+        checkAnswersBtn.disabled = true;
+    };
+    
+    const backToSelectionFromFill = () => {
+        if (gameTimerInterval) stopTimer();
+        fillGameScreen.classList.add('hidden');
+        selectionScreen.classList.remove('hidden');
+    };
+
     const placeElementInGrid = (elementNumber, targetPlaceholder, source, originPlaceholder = null) => {
         const droppedElementData = elements.find(el => el.number == elementNumber);
         if (!droppedElementData) return;
 
-        // Create the visual element for the grid
         const droppedElementDiv = document.createElement('div');
         droppedElementDiv.className = 'element placed';
         droppedElementDiv.dataset.number = droppedElementData.number;
         droppedElementDiv.innerHTML = `<div class="symbol">${droppedElementData.symbol}</div>`;
 
-        // Make this element draggable for future moves (both mouse and touch)
         makeElementInGridDraggable(droppedElementDiv);
-        targetPlaceholder.innerHTML = ''; // Clear just in case
+        targetPlaceholder.innerHTML = '';
         targetPlaceholder.appendChild(droppedElementDiv);
 
-        // If moved from another cell, clear the old one
         if (source === 'grid' && originPlaceholder) {
             originPlaceholder.innerHTML = '';
             delete placedElements[`${originPlaceholder.dataset.x}-${originPlaceholder.dataset.y}`];
         }
 
-        // Update state
         placedElements[`${targetPlaceholder.dataset.x}-${targetPlaceholder.dataset.y}`] = droppedElementData.number;
 
-        // Advance if it was a new element from the bank
         if (source === 'bank') {
             currentFillElementIndex++;
             displayNextFillElement();
         }
     };
 
-    /**
-     * UPDATED: Attaches both mouse and touch listeners.
-     */
     const makeElementInGridDraggable = (elementDiv) => {
-        // MOUSE drag events
         elementDiv.draggable = true;
         elementDiv.addEventListener('dragstart', (e) => {
             e.stopPropagation();
-            // --- เพิ่มบรรทัดนี้ ---
             elementDiv.classList.add('dragging'); 
             const parentPlaceholder = elementDiv.parentElement;
             e.dataTransfer.setData('text/plain', elementDiv.dataset.number);
@@ -440,12 +522,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.dataTransfer.setData('origin-y', parentPlaceholder.dataset.y);
         });
 
-        // --- เพิ่ม Event Listener นี้เข้าไป ---
         elementDiv.addEventListener('dragend', () => {
             elementDiv.classList.remove('dragging');
         });
 
-        // TOUCH events
         elementDiv.addEventListener('touchstart', (e) => {
             handleTouchStart(e, 'grid');
         }, { passive: false });
@@ -462,7 +542,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     placeholder.dataset.y = y;
                     placeholder.style.gridColumn = x;
                     placeholder.style.gridRow = y;
-                    // MOUSE event
                     placeholder.addEventListener('dragover', e => {
                         e.preventDefault();
                         placeholder.classList.add('drag-over');
@@ -475,9 +554,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    /**
-     * UPDATED: Attaches both mouse and touch listeners to elements from the bank.
-     */
     const displayNextFillElement = () => {
         elementBank.innerHTML = '';
         if (currentFillElementIndex >= fillGameElements.length) {
@@ -491,13 +567,11 @@ document.addEventListener('DOMContentLoaded', () => {
         draggableDiv.dataset.number = elementToPlace.number;
         draggableDiv.innerHTML = `<div class="symbol">${elementToPlace.symbol}</div><div class="name">${elementToPlace.name}</div>`;
 
-        // MOUSE event
         draggableDiv.addEventListener('dragstart', (e) => {
             e.dataTransfer.setData('text/plain', elementToPlace.number);
             e.dataTransfer.setData('source', 'bank');
         });
 
-        // TOUCH event
         draggableDiv.addEventListener('touchstart', (e) => {
             handleTouchStart(e, 'bank');
         }, { passive: false });
@@ -505,9 +579,6 @@ document.addEventListener('DOMContentLoaded', () => {
         elementBank.appendChild(draggableDiv);
     };
 
-    /**
-     * RENAMED & SIMPLIFIED: Handles mouse drops only.
-     */
     const handleMouseDrop = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -528,9 +599,8 @@ document.addEventListener('DOMContentLoaded', () => {
         placeElementInGrid(elementNumber, targetPlaceholder, source, originPlaceholder);
     };
 
-    // ===== NEW: Custom Touch Handlers for Mobile =====
     const handleTouchStart = (e, source) => {
-        e.preventDefault(); // Prevent scrolling
+        e.preventDefault();
         const originalElement = e.currentTarget;
         touchState.originalElement = originalElement;
         touchState.source = source;
@@ -539,16 +609,10 @@ document.addEventListener('DOMContentLoaded', () => {
             touchState.originPlaceholder = originalElement.parentElement;
         }
 
-        // Create a visual clone of the element to drag
         const clone = originalElement.cloneNode(true);
-        
-        // --- จุดแก้ไขสุดท้ายที่ได้ผลแน่นอน ---
-        // ใช้ setProperty เพื่อบังคับใช้สไตล์ !important ทับของเดิม
         clone.style.setProperty('background-color', '#cccccc', 'important');
         clone.style.setProperty('color', '#333', 'important');
         clone.style.opacity = '0.7';
-        // --- จบจุดแก้ไข ---
-
         clone.style.position = 'absolute';
         clone.style.zIndex = '1000';
         clone.style.pointerEvents = 'none';
@@ -569,12 +633,9 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         const touch = e.touches[0];
-        // Move the clone
         touchState.draggedElement.style.left = `${touch.clientX - touchState.draggedElement.offsetWidth / 2}px`;
         touchState.draggedElement.style.top = `${touch.clientY - touchState.draggedElement.offsetHeight / 2}px`;
 
-        // Highlight placeholder underneath
-        // Hide clone temporarily to find what's under it
         touchState.draggedElement.style.display = 'none';
         const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
         touchState.draggedElement.style.display = '';
@@ -588,7 +649,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleTouchEnd = (e) => {
         if (!touchState.isDragging || !touchState.draggedElement) return;
 
-        // Find the target placeholder
         const touch = e.changedTouches[0];
         touchState.draggedElement.style.display = 'none';
         const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -601,111 +661,30 @@ document.addEventListener('DOMContentLoaded', () => {
             placeElementInGrid(elementNumber, targetPlaceholder, touchState.source, touchState.originPlaceholder);
         }
 
-        // Cleanup
         document.querySelectorAll('.placeholder-element.drag-over').forEach(p => p.classList.remove('drag-over'));
         document.body.removeChild(touchState.draggedElement);
         touchState = { isDragging: false, draggedElement: null, originalElement: null, source: null, originPlaceholder: null };
     };
 
-    // Attach global listeners for touch
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd);
-
-
-    // ... (โค้ดส่วน checkAnswers, backToSelectionFromFill และ Custom Groups Logic ไม่มีการเปลี่ยนแปลง) ...
-    const checkAnswers = () => {
-    // 1. รีเซ็ตสถานะการตรวจคำตอบทั้งหมดก่อนเริ่มตรวจใหม่
-    document.querySelectorAll('.placeholder-element').forEach(p => {
-        p.classList.remove('correct-placement', 'incorrect-placement');
-        p.removeAttribute('data-correct-symbol');
-    });
-
-    let allCorrect = true;
-
-    // 2. วนลูปตรวจทุกช่องที่มีการวางธาตุลงไป
-    document.querySelectorAll('.placeholder-element:has(.element)').forEach(placeholder => {
-        const droppedElementNumber = placeholder.querySelector('.element').dataset.number;
-        const correctElement = elements.find(el => el.number == droppedElementNumber);
-        const placedX = parseInt(placeholder.dataset.x);
-        const placedY = parseInt(placeholder.dataset.y);
-        const elementDiv = placeholder.querySelector('.element');
-
-        // 3. ตรวจสอบว่าตำแหน่งที่วาง ถูกต้องหรือไม่
-        if (correctElement.x === placedX && correctElement.y === placedY) {
-            // ถ้าถูกต้อง:
-            placeholder.classList.add('correct-placement'); // เพิ่มเส้นขอบสีเขียว
-            if (elementDiv) {
-                elementDiv.classList.remove('placed'); // ลบคลาสสีเทาออก
-                elementDiv.classList.add(correctElement.category); // เพิ่มคลาสสีตามหมวดหมู่กลับไป
-            }
-        } else {
-            // ถ้าไม่ถูกต้อง:
-            allCorrect = false;
-            placeholder.classList.add('incorrect-placement'); // เพิ่มเส้นขอบสีแดง
-            
-            // สร้างคำใบ้ว่าช่องนี้ควรเป็นธาตุอะไร
-            const elementThatShouldBeHere = elements.find(el => el.x === placedX && el.y === placedY);
-            placeholder.dataset.correctSymbol = elementThatShouldBeHere ? `ควรเป็น ${elementThatShouldBeHere.symbol}` : 'ช่องนี้ว่าง';
-        }
-    });
-
-    // 4. ตรวจสอบว่าผู้เล่นวางธาตุครบทุกตัวที่เลือกมาหรือไม่
-    if (Object.keys(placedElements).length < fillGameElements.length) {
-        alert('คุณยังวางธาตุไม่ครบทุกตัว');
-        // รีเซ็ตสถานะการตรวจ เพราะยังไม่ควรแสดงผลลัพธ์
-        document.querySelectorAll('.placeholder-element').forEach(p => {
-            p.classList.remove('correct-placement', 'incorrect-placement');
-            p.removeAttribute('data-correct-symbol');
-            const elementDiv = p.querySelector('.element');
-            if (elementDiv && !elementDiv.classList.contains('placed')) {
-                 // ถ้ามีการเปลี่ยนสีไปแล้ว ให้กลับเป็นสีเทา
-                const categoryClass = Array.from(elementDiv.classList).find(c => categories[c]);
-                if(categoryClass) elementDiv.classList.remove(categoryClass);
-                elementDiv.classList.add('placed');
-            }
-        });
-        return;
-    }
-
-    // 5. แสดงผลลัพธ์สุดท้ายในช่อง Element Bank
-    if (allCorrect) {
-        elementBank.innerHTML = '<h2>เก่งมาก! ถูกต้องทั้งหมด! 🎉</h2>';
-    } else {
-        elementBank.innerHTML = '<h3>ผลลัพธ์: สีเขียวคือถูกต้อง, สีแดงคือผิด (พร้อมคำใบ้)</h3>';
-    }
-
-    // 6. ปิดปุ่มตรวจคำตอบหลังจากการตรวจเสร็จสิ้น
-    checkAnswersBtn.disabled = true;
-};
-
-    const backToSelectionFromFill = () => {
-        fillGameScreen.classList.add('hidden');
-        selectionScreen.classList.remove('hidden');
-    };
-
     const STORAGE_KEY = 'customElementGroups';
-
-    const getCustomGroups = () => {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    };
-
-    const saveCustomGroups = (groups) => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(groups));
-    };
+    const getCustomGroups = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const saveCustomGroups = (groups) => localStorage.setItem(STORAGE_KEY, JSON.stringify(groups));
 
     const populateCustomGroupsModal = () => {
         const groups = getCustomGroups();
-        customGroupsList.innerHTML = ''; // Clear existing list
-
+        customGroupsList.innerHTML = '';
         if (groups.length === 0) {
             customGroupsList.innerHTML = '<li>ยังไม่มีกลุ่มที่บันทึกไว้</li>';
             return;
         }
-
         groups.forEach(group => {
             const li = document.createElement('li');
+            const bestTime = userBestTimes[group.name];
             li.innerHTML = `
-                <span class="group-name">${group.name}</span>
+                <div class="group-info">
+                    <span class="group-name">${group.name}</span>
+                    <span class="best-time">Best: ${formatTime(bestTime)}</span>
+                </div>
                 <div class="group-actions">
                     <button class="use-group-btn" data-group-name="${group.name}">ใช้กลุ่มนี้</button>
                     <button class="delete-group-btn" data-group-name="${group.name}">ลบ</button>
@@ -729,13 +708,6 @@ document.addEventListener('DOMContentLoaded', () => {
         startGameBtn.textContent = '▶️ เริ่มเกม';
     };
 
-    // ===== NEW: Firebase Auth Logic =====
-    const auth = window.firebaseAuth.auth;
-    const provider = window.firebaseAuth.provider;
-    const signInWithPopup = window.firebaseAuth.signInWithPopup;
-    const onAuthStateChanged = window.firebaseAuth.onAuthStateChanged;
-    const signOut = window.firebaseAuth.signOut;
-
     const signInWithGoogle = () => {
         signInWithPopup(auth, provider)
             .then((result) => {
@@ -754,22 +726,82 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const handleProfileUpdate = async () => {
+        const user = auth.currentUser;
+        const newName = newUsernameInput.value.trim();
+        profileUpdateFeedback.textContent = '';
+        profileUpdateFeedback.className = '';
 
-    // ===== EVENT LISTENERS =====
-    // ... (Event Listeners เดิมทั้งหมด)
+        if (!user) {
+            profileUpdateFeedback.textContent = 'ไม่พบข้อมูลผู้ใช้';
+            profileUpdateFeedback.classList.add('error');
+            return;
+        }
+        if (!newName) {
+            profileUpdateFeedback.textContent = 'กรุณากรอกชื่อใหม่';
+            profileUpdateFeedback.classList.add('error');
+            return;
+        }
+
+        try {
+            await updateProfile(user, { displayName: newName });
+            usernameDisplay.textContent = newName;
+            profileUpdateFeedback.textContent = 'อัปเดตโปรไฟล์สำเร็จ!';
+            profileUpdateFeedback.classList.add('success');
+            setTimeout(() => {
+                editProfileModal.classList.add('hidden');
+            }, 1500);
+        } catch (error) {
+            console.error("Profile update failed:", error);
+            profileUpdateFeedback.textContent = 'เกิดข้อผิดพลาด: ' + error.message;
+            profileUpdateFeedback.classList.add('error');
+        }
+    };
+
+    cellWidthSlider.addEventListener('input', (e) => setCellSize(e.target.value, cellHeightSlider.value));
+    cellHeightSlider.addEventListener('input', (e) => setCellSize(cellWidthSlider.value, e.target.value));
+    resetSizeBtn.addEventListener('click', () => {
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
+        const defaultSize = isMobile ? MOBILE_DEFAULT_CELL_SIZE : DESKTOP_DEFAULT_CELL_SIZE;
+        setCellSize(defaultSize, defaultSize);
+        localStorage.removeItem('customCellWidth');
+        localStorage.removeItem('customCellHeight');
+    });
+    
+    settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+    closeModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+    settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.add('hidden'); });
+    lightModeBtn.addEventListener('click', () => setTheme('light'));
+    darkModeBtn.addEventListener('click', () => setTheme('dark'));
+    gameModeRadios.forEach(radio => radio.addEventListener('change', (e) => setGameMode(e.target.value)));
+
+    selectAllBtn.addEventListener('click', () => {
+        document.querySelectorAll('.element').forEach(el => el.classList.add('selected'));
+        lastSelectionMode = 'all';
+    });
+    deselectAllBtn.addEventListener('click', () => {
+        document.querySelectorAll('.element').forEach(el => el.classList.remove('selected'));
+        lastSelectionMode = null;
+    });
+    selectMainGroupsBtn.addEventListener('click', () => {
+        document.querySelectorAll('.element.selected').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.element').forEach(el => {
+            const col = parseInt(el.style.gridColumn);
+            if (col === 1 || col === 2 || (col >= 13 && col <= 18) && (parseInt(el.style.gridRow)<2)) {
+                el.classList.add('selected');
+            }
+        });
+        lastSelectionMode = 'main';
+    });
+    
     customGroupsBtn.addEventListener('click', () => {
         if (isCreatingGroup) {
             exitGroupCreationMode();
             alert('ยกเลิกการสร้างกลุ่มแล้ว');
             return;
         }
-        const groups = getCustomGroups();
-        if (groups.length === 0) {
-            enterGroupCreationMode();
-        } else {
-            populateCustomGroupsModal();
-            customGroupsModal.classList.remove('hidden');
-        }
+        populateCustomGroupsModal();
+        customGroupsModal.classList.remove('hidden');
     });
 
     createNewGroupBtn.addEventListener('click', enterGroupCreationMode);
@@ -795,14 +827,11 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('กรุณาตั้งชื่อกลุ่ม');
             return;
         }
-
         const selectedElements = Array.from(document.querySelectorAll('.element.selected')).map(el => parseInt(el.dataset.number));
         const newGroup = { name: groupName, elements: selectedElements };
-
         const groups = getCustomGroups();
         groups.push(newGroup);
         saveCustomGroups(groups);
-
         alert(`บันทึกกลุ่ม "${groupName}" เรียบร้อยแล้ว!`);
         saveGroupModal.classList.add('hidden');
         exitGroupCreationMode();
@@ -822,6 +851,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (elDiv) elDiv.classList.add('selected');
                 });
                 customGroupsModal.classList.add('hidden');
+                lastSelectionMode = `custom_${groupName}`;
             }
         } else if (e.target.classList.contains('delete-group-btn')) {
             if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่ม "${groupName}"?`)) {
@@ -835,23 +865,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeCustomGroupsModalBtn.addEventListener('click', () => customGroupsModal.classList.add('hidden'));
     closeSaveGroupModalBtn.addEventListener('click', () => saveGroupModal.classList.add('hidden'));
+    
     flipCardBtn.addEventListener('click', () => flashcard.classList.toggle('flipped'));
     nextCardBtn.addEventListener('click', () => {
         currentCardIndex++;
         displayCard();
     });
     backToSelectionBtn.addEventListener('click', backToSelectionFromFlashcard);
-    selectAllBtn.addEventListener('click', () => document.querySelectorAll('.element').forEach(el => el.classList.add('selected')));
-    deselectAllBtn.addEventListener('click', () => document.querySelectorAll('.element').forEach(el => el.classList.remove('selected')));
-    selectMainGroupsBtn.addEventListener('click', () => {
-        document.querySelectorAll('.element.selected').forEach(el => el.classList.remove('selected'));
-        document.querySelectorAll('.element').forEach(el => {
-            const col = parseInt(el.style.gridColumn);
-            if (col === 1 || col === 2 || (col >= 13 && col <= 18) && (parseInt(el.style.gridRow) < 7)) { // selecct 8 main elements
-                el.classList.add('selected');
-            }
-        });
-    });
+    
     closeChoiceModalBtn.addEventListener('click', () => gameChoiceModal.classList.add('hidden'));
     gameChoiceModal.addEventListener('click', (e) => { if (e.target === gameChoiceModal) gameChoiceModal.classList.add('hidden'); });
     startFlashcardGameBtn.addEventListener('click', () => {
@@ -862,30 +883,37 @@ document.addEventListener('DOMContentLoaded', () => {
         gameChoiceModal.classList.add('hidden');
         startFillTheBlanksGame();
     });
+    
     checkAnswersBtn.addEventListener('click', checkAnswers);
     fillBackToSelectionBtn.addEventListener('click', backToSelectionFromFill);
 
-    // NEW Listeners for sidebar and login
     hamburgerBtn.addEventListener('click', () => sidebar.classList.remove('hidden'));
     closeSidebarBtn.addEventListener('click', () => sidebar.classList.add('hidden'));
     loginBtn.addEventListener('click', signInWithGoogle);
     logoutBtn.addEventListener('click', signOutUser);
 
-
-    // ===== INITIALIZATION =====
-    const initializeApp = () => {
-        if (!elements || elements.length === 0) {
-            console.error("Element data is missing. Please paste it into the script.");
-            alert("ข้อมูลธาตุไม่สมบูรณ์ กรุณาตรวจสอบไฟล์ script.js");
-            return;
+    editProfileBtn.addEventListener('click', () => {
+        const user = auth.currentUser;
+        if (user) {
+            newUsernameInput.value = user.displayName || '';
+            profileUpdateFeedback.textContent = '';
+            profileUpdateFeedback.className = '';
+            editProfileModal.classList.remove('hidden');
         }
+    });
+    closeEditProfileModalBtn.addEventListener('click', () => editProfileModal.classList.add('hidden'));
+    saveProfileBtn.addEventListener('click', handleProfileUpdate);
+    
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd);
+    
+    const initializeApp = () => {
         createPeriodicTable();
         createLegend();
 
         const savedTheme = localStorage.getItem('theme') || 'light';
         const savedGameMode = localStorage.getItem('gameMode') || 'symbol-to-name';
 
-        // --- UPDATED: Initialization logic for cell size ---
         let initialWidth = localStorage.getItem('customCellWidth');
         let initialHeight = localStorage.getItem('customCellHeight');
 
@@ -900,20 +928,18 @@ document.addEventListener('DOMContentLoaded', () => {
         setGameMode(savedGameMode);
         setCellSize(initialWidth, initialHeight);
 
-        // NEW: Listen for auth state changes
         onAuthStateChanged(auth, user => {
             if (user) {
-                // User is signed in.
                 profileContainer.classList.remove('hidden');
                 loginContainer.classList.add('hidden');
-                
-                usernameDisplay.textContent = user.displayName;
-                profilePic.src = user.photoURL;
-
+                usernameDisplay.textContent = user.displayName || 'User';
+                profilePic.src = user.photoURL || 'https://via.placeholder.com/80';
+                fetchUserBestTimes(user.uid);
             } else {
-                // User is signed out.
                 profileContainer.classList.add('hidden');
                 loginContainer.classList.remove('hidden');
+                userBestTimes = {};
+                updateBestTimesUI();
             }
         });
     };
