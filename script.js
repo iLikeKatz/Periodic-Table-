@@ -787,7 +787,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.element.selected').forEach(el => el.classList.remove('selected'));
         document.querySelectorAll('.element').forEach(el => {
             const col = parseInt(el.style.gridColumn);
-            if (col === 1 || col === 2 || (col >= 13 && col <= 18) && (parseInt(el.style.gridRow)<7)) {
+            if (col === 1 || col === 2 || (col >= 13 && col <= 18) && (parseInt(el.style.gridRow)<8)) {
                 el.classList.add('selected');
             }
         });
