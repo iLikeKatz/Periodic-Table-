@@ -1,7 +1,7 @@
 
 
 document.addEventListener('DOMContentLoaded', () => {
-
+    
 
     const elements = [
         { "number": 1, "symbol": "H", "name": "ไฮโดรเจน", "mass": 1.008, "category": "diatomic-nonmetal", "y": 1, "x": 1 },
@@ -250,7 +250,64 @@ document.addEventListener('DOMContentLoaded', () => {
         updateBestTimesUI();
     };
 
-    const updateUserBestTime = async (userId, gameKey, newTime) => {
+    
+    // === Leaderboard Integration (added) ===
+    // บันทึกลงคอลเลกชันแยกเพื่อสร้าง leaderboard:
+    // - leaderboard_main  (8 หมู่หลัก / 'main_groups')
+    // - leaderboard_all   (ธาตุทั้งหมด / 'all_elements')
+    const saveLeaderboardRecord = async (gameKey, timeSeconds) => {
+        try {
+            const user = auth.currentUser;
+            if (!user) return;
+            const colName = (gameKey === 'main_groups') ? 'leaderboard_main' : 'leaderboard_all';
+            const ref = doc(db, colName, user.uid);
+            const snap = await getDoc(ref);
+            const username = user.displayName || (user.email ? user.email.split('@')[0] : 'ไม่ระบุชื่อ');
+            const timeMs = Math.max(0, Math.round((Number(timeSeconds) || 0) * 1000));
+            const prev = snap.exists() && typeof snap.data().timeMs === 'number' ? snap.data().timeMs : Infinity;
+            if (timeMs < prev) {
+                await setDoc(ref, { username, timeMs, updatedAt: Date.now() }, { merge: true });
+                console.log('[Leaderboard] Updated', colName, timeMs);
+            }
+        } catch (e) {
+            console.warn('[Leaderboard] save failed', e);
+        }
+    };
+    // เผื่อใช้เรียกเองจากที่อื่นได้:
+    window.saveLeaderboard = (modeOrKey, timeMs) => {
+        // รองรับทั้ง 'main'/'all' หรือใช้ gameKey ตรง ๆ
+        const key = (modeOrKey === 'main') ? 'main_groups'
+                  : (modeOrKey === 'all') ? 'all_elements'
+                  : modeOrKey;
+        const secs = (Number(timeMs) || 0) / 1000;
+        return saveLeaderboardRecord(key, secs);
+    };
+    // === End Leaderboard Integration ===
+    // === Username Sync for Leaderboard (added) ===
+    // อัปเดตชื่อใน leaderboard ทั้งสองโหมดให้ตรงกับชื่อปัจจุบันของผู้ใช้
+    const applyUsernameToLeaderboard = async (newName) => {
+        try {
+            const user = auth.currentUser;
+            if (!user) return;
+            const cols = ['leaderboard_main', 'leaderboard_all'];
+            await Promise.all(
+                cols.map(async (col) => {
+                    const ref = doc(db, col, user.uid);
+                    const snap = await getDoc(ref);
+                    if (snap.exists()) {
+                        await setDoc(ref, { username: newName, updatedAt: Date.now() }, { merge: true });
+                    }
+                })
+            );
+            console.log('[Leaderboard] Username synced:', newName);
+        } catch (e) {
+            console.warn('[Leaderboard] Username sync failed', e);
+        }
+    };
+    // === End Username Sync (added) ===
+
+
+const updateUserBestTime = async (userId, gameKey, newTime) => {
         if (!userId || !gameKey) return;
         const currentBest = userBestTimes[gameKey] || Infinity;
         if (newTime < currentBest) {
@@ -260,6 +317,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 await setDoc(userDocRef, { bestTimes: userBestTimes }, { merge: true });
                 console.log(`New best time for ${gameKey}: ${newTime}`);
                 updateBestTimesUI();
+                // ส่งผลไปยัง Leaderboard ด้วย
+                saveLeaderboardRecord(gameKey, newTime);
+
             } catch (error) {
                 console.error("Error updating best time:", error);
             }
@@ -409,10 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startTimer();
     };
 
-
-
     const checkAnswers = () => {
-        stopTimer();
         document.querySelectorAll('.placeholder-element').forEach(p => {
             p.classList.remove('correct-placement', 'incorrect-placement');
             p.removeAttribute('data-correct-symbol');
@@ -447,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const elementDiv = p.querySelector('.element');
                 if (elementDiv && !elementDiv.classList.contains('placed')) {
                     const categoryClass = Array.from(elementDiv.classList).find(c => categories[c]);
-                    if (categoryClass) elementDiv.classList.remove(categoryClass);
+                    if(categoryClass) elementDiv.classList.remove(categoryClass);
                     elementDiv.classList.add('placed');
                 }
             });
@@ -480,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         checkAnswersBtn.disabled = true;
     };
-
+    
     const backToSelectionFromFill = () => {
         if (gameTimerInterval) stopTimer();
         fillGameScreen.classList.add('hidden');
@@ -517,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elementDiv.draggable = true;
         elementDiv.addEventListener('dragstart', (e) => {
             e.stopPropagation();
-            elementDiv.classList.add('dragging');
+            elementDiv.classList.add('dragging'); 
             const parentPlaceholder = elementDiv.parentElement;
             e.dataTransfer.setData('text/plain', elementDiv.dataset.number);
             e.dataTransfer.setData('source', 'grid');
@@ -630,7 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         touchState.isDragging = true;
     };
-
+    
     const handleTouchMove = (e) => {
         if (!touchState.isDragging || !touchState.draggedElement) return;
         e.preventDefault();
@@ -748,6 +805,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             await updateProfile(user, { displayName: newName });
+  await applyUsernameToLeaderboard(newName);
             usernameDisplay.textContent = newName;
             profileUpdateFeedback.textContent = 'อัปเดตโปรไฟล์สำเร็จ!';
             profileUpdateFeedback.classList.add('success');
@@ -770,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('customCellWidth');
         localStorage.removeItem('customCellHeight');
     });
-
+    
     settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
     closeModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
     settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.add('hidden'); });
@@ -790,13 +848,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.element.selected').forEach(el => el.classList.remove('selected'));
         document.querySelectorAll('.element').forEach(el => {
             const col = parseInt(el.style.gridColumn);
-            if (col === 1 || col === 2 || (col >= 13 && col <= 18) && (parseInt(el.style.gridRow) < 8)) {
+            if (col === 1 || col === 2 || (col >= 13 && col <= 18) && (parseInt(el.style.gridRow)<8)) {
                 el.classList.add('selected');
             }
         });
         lastSelectionMode = 'main';
     });
-
+    
     customGroupsBtn.addEventListener('click', () => {
         if (isCreatingGroup) {
             exitGroupCreationMode();
@@ -868,14 +926,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeCustomGroupsModalBtn.addEventListener('click', () => customGroupsModal.classList.add('hidden'));
     closeSaveGroupModalBtn.addEventListener('click', () => saveGroupModal.classList.add('hidden'));
-
+    
     flipCardBtn.addEventListener('click', () => flashcard.classList.toggle('flipped'));
     nextCardBtn.addEventListener('click', () => {
         currentCardIndex++;
         displayCard();
     });
     backToSelectionBtn.addEventListener('click', backToSelectionFromFlashcard);
-
+    
     closeChoiceModalBtn.addEventListener('click', () => gameChoiceModal.classList.add('hidden'));
     gameChoiceModal.addEventListener('click', (e) => { if (e.target === gameChoiceModal) gameChoiceModal.classList.add('hidden'); });
     startFlashcardGameBtn.addEventListener('click', () => {
@@ -886,7 +944,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameChoiceModal.classList.add('hidden');
         startFillTheBlanksGame();
     });
-
+    
     checkAnswersBtn.addEventListener('click', checkAnswers);
     fillBackToSelectionBtn.addEventListener('click', backToSelectionFromFill);
 
@@ -906,10 +964,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     closeEditProfileModalBtn.addEventListener('click', () => editProfileModal.classList.add('hidden'));
     saveProfileBtn.addEventListener('click', handleProfileUpdate);
-
+    
     document.addEventListener('touchmove', handleTouchMove, { passive: false });
     document.addEventListener('touchend', handleTouchEnd);
-
+    
     const initializeApp = () => {
         createPeriodicTable();
         createLegend();
@@ -926,56 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
             initialWidth = defaultSize;
             initialHeight = defaultSize;
         }
-
-        setTheme(savedTheme);
-        setGameMode(savedGameMode);
-        setCellSize(initialWidth, initialHeight);
-
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                profileContainer.classList.remove('hidden');
-                loginContainer.classList.add('hidden');
-                usernameDisplay.textContent = user.displayName || 'User';
-                profilePic.src = user.photoURL || 'https://via.placeholder.com/80';
-                fetchUserBestTimes(user.uid);
-            } else {
-                profileContainer.classList.add('hidden');
-                loginContainer.classList.remove('hidden');
-                userBestTimes = {};
-                updateBestTimesUI();
-            }
-        });
-    };
-
-    initializeApp();
-});
-
-/* ===================================================================================
- * ULTRA FEATURE PACK (added)
- * - Dynamic Background (particles)
- * - Confetti on new best time
- * - Avatar Seed (DiceBear) + resolver
- * - Badges System (achievements)
- * - Daily/Weekly Challenge save
- * - Live Multiplayer (rooms, players, start, progress, finish)
- * - Ghost Recorder (scaffold)
- * =================================================================================== */
-
-(() => {
-    const { auth } = window.firebaseAuth || {};
-    const {
-        db, doc, getDoc, setDoc, updateDoc, addDoc,
-        collection, onSnapshot, serverTimestamp, query, where, getDocs
-    } = window.firebaseDb || {};
-
-    // ===== Utility =====
-    const nowMs = () => Date.now();
-    const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-    const safeUser = () => (auth && auth.currentUser) ? auth.currentUser : null;
-    const usernameOf = (user) => user?.displayName || (user?.email ? user.email.split('@')[0] : 'ไม่ระบุชื่อ');
-
-    // ===== 1) Dynamic Background (particles) =====
-    function initDynamicBackground() {
+        function initDynamicBackground() {
         const existing = document.getElementById('bg-particles');
         if (existing) return;
         const c = document.createElement('canvas');
@@ -1030,216 +1039,28 @@ document.addEventListener('DOMContentLoaded', () => {
         step();
     }
 
-    // ===== 2) Confetti =====
-    function confettiBurst(times = 180) {
-        // Lightweight confetti
-        const container = document.createElement('div');
-        container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;';
-        document.body.appendChild(container);
-        const pieces = 180;
-        for (let i = 0; i < pieces; i++) {
-            const d = document.createElement('div');
-            d.style.position = 'absolute';
-            d.style.left = (Math.random() * 100) + '%';
-            d.style.top = '-10px';
-            d.style.width = '6px'; d.style.height = '10px';
-            d.style.background = `hsl(${Math.random() * 360},90%,60%)`;
-            d.style.opacity = '0.9';
-            d.style.transform = `rotate(${Math.random() * 360}deg)`;
-            d.style.filter = 'drop-shadow(0 2px 2px rgba(0,0,0,.2))';
-            container.appendChild(d);
-            const tx = (Math.random() * 200 - 100);
-            const ty = (innerHeight + 80);
-            const rot = (Math.random() * 720 - 360);
-            d.animate([
-                { transform: `translate(0,0) rotate(0deg)` },
-                { transform: `translate(${tx}px, ${ty}px) rotate(${rot}deg)` }
-            ], { duration: 1200 + Math.random() * 1200, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
-        }
-        setTimeout(() => container.remove(), 2500);
-    }
+        initDynamicBackground();
+        
 
-    // ===== 3) Avatar Seed (DiceBear) =====
-    async function saveAvatarSeed(seed) {
-        if (!db) return;
-        const user = safeUser(); if (!user) return;
-        await setDoc(doc(db, 'users', user.uid), { avatarSeed: seed, updatedAt: serverTimestamp?.() || nowMs() }, { merge: true });
-    }
-    function avatarUrlFromSeed(seed = 'default', style = 'bottts', size = 80) {
-        return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=${size}&radius=50`;
-    }
-    function resolveAvatarUrl(userProfileDoc) {
-        const user = safeUser();
-        if (user?.photoURL) return user.photoURL;
-        if (userProfileDoc?.avatarUrl) return userProfileDoc.avatarUrl;
-        if (userProfileDoc?.avatarSeed) return avatarUrlFromSeed(userProfileDoc.avatarSeed);
-        const seed = (user?.uid || 'guest').slice(0, 12);
-        return avatarUrlFromSeed(seed);
-    }
-    window.saveAvatarSeed = saveAvatarSeed;
-    window.resolveAvatarUrl = resolveAvatarUrl;
+        setTheme(savedTheme);
+        setGameMode(savedGameMode);
+        setCellSize(initialWidth, initialHeight);
 
-    // ===== 4) Badges System =====
-    async function awardBadgesIfAny({ modeKey, timeSec }) {
-        if (!db) return;
-        const user = safeUser(); if (!user) return;
-        const userRef = doc(db, 'users', user.uid);
-        const snap = await getDoc(userRef);
-        const data = snap.exists() ? snap.data() : {};
-        const badges = new Set(Array.isArray(data.badges) ? data.badges : []);
-        const fastMain = 120;
-        const fastAll = 300;
-        if (modeKey === 'main_groups' && timeSec <= fastMain) badges.add('FAST_MAIN_2MIN');
-        if (modeKey === 'all_elements' && timeSec <= fastAll) badges.add('FAST_ALL_5MIN');
-
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-        let last = data.lastPlayDate || 0;
-        let streak = data.streakDays || 0;
-        const dLast = new Date(last); dLast.setHours(0, 0, 0, 0);
-        const diff = Math.round((today - dLast) / 86400000);
-        if (last === 0 || diff > 1) streak = 1;
-        else if (diff === 1) streak = (streak || 1) + 1;
-        if (streak >= 7) badges.add('STREAK_7');
-        if (streak >= 30) badges.add('STREAK_30');
-
-        await setDoc(userRef, {
-            badges: Array.from(badges),
-            lastPlayDate: today.getTime(),
-            streakDays: streak,
-            updatedAt: serverTimestamp?.() || nowMs()
-        }, { merge: true });
-
-        if (typeof window.updateBadgesUI === 'function') {
-            window.updateBadgesUI(Array.from(badges));
-        }
-    }
-
-    // ===== 5) Daily / Weekly Challenge Save =====
-    function getDailyId(d = new Date()) {
-        const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0');
-        return `${y}${m}${day}`;
-    }
-    function getWeekId(d = new Date()) {
-        const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-        const dayNum = dt.getUTCDay() || 7;
-        dt.setUTCDate(dt.getUTCDate() + 4 - dayNum);
-        const yearStart = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1));
-        const weekNo = Math.ceil((((dt - yearStart) / 86400000) + 1) / 7);
-        return `${dt.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
-    }
-    async function saveChallengeResult({ modeKey, timeMs }) {
-        if (!db) return;
-        const user = safeUser(); if (!user) return;
-        const username = usernameOf(user);
-        const dayId = getDailyId(); const weekId = getWeekId();
-        const colDaily = `daily_${dayId}_${modeKey}`;
-        const colWeekly = `weekly_${weekId}_${modeKey}`;
-        for (const col of [colDaily, colWeekly]) {
-            const ref = doc(db, col, user.uid);
-            const snap = await getDoc(ref);
-            const prev = snap.exists() ? (snap.data().timeMs ?? Infinity) : Infinity;
-            if (timeMs < prev) {
-                await setDoc(ref, { username, timeMs, updatedAt: serverTimestamp?.() || nowMs() }, { merge: true });
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                profileContainer.classList.remove('hidden');
+                loginContainer.classList.add('hidden');
+                usernameDisplay.textContent = user.displayName || 'User';
+                profilePic.src = user.photoURL || 'https://via.placeholder.com/80';
+                fetchUserBestTimes(user.uid);
+            } else {
+                profileContainer.classList.add('hidden');
+                loginContainer.classList.remove('hidden');
+                userBestTimes = {};
+                updateBestTimesUI();
             }
-        }
-    }
-
-    // ===== 6) Multiplayer (Firestore rooms) =====
-    async function createRoom({ mode = 'main_groups', roundSec = 180 } = {}) {
-        if (!db) throw new Error('Firestore not ready');
-        const user = safeUser(); if (!user) throw new Error('ต้องล็อกอิน');
-        const roomId = (crypto?.randomUUID?.() || Math.random().toString(36).slice(2)).slice(0, 6).toUpperCase();
-        const roomRef = doc(db, 'rooms', roomId);
-        await setDoc(roomRef, {
-            ownerUid: user.uid,
-            createdAt: serverTimestamp?.() || nowMs(),
-            status: 'lobby',
-            mode, startAt: null, roundSec
         });
-        await joinRoom(roomId);
-        return roomId;
-    }
-    async function joinRoom(roomId) {
-        if (!db) return;
-        const user = safeUser(); if (!user) throw new Error('ต้องล็อกอิน');
-        const playerRef = doc(db, 'rooms', roomId, 'players', user.uid);
-        await setDoc(playerRef, {
-            username: usernameOf(user),
-            joinedAt: serverTimestamp?.() || nowMs(),
-            ready: false, progress: 0, finished: false, timeMs: null, lastSeen: serverTimestamp?.() || nowMs()
-        }, { merge: true });
-    }
-    async function setReady(roomId, ready) {
-        if (!db) return;
-        const user = safeUser(); if (!user) return;
-        const playerRef = doc(db, 'rooms', roomId, 'players', user.uid);
-        await updateDoc(playerRef, { ready: !!ready, lastSeen: serverTimestamp?.() || nowMs() });
-    }
-    async function startCountdown(roomId, seconds = 5) {
-        if (!db) return;
-        const user = safeUser(); if (!user) return;
-        const roomRef = doc(db, 'rooms', roomId);
-        const snap = await getDoc(roomRef);
-        if (!snap.exists()) throw new Error('room not found');
-        const room = snap.data();
-        if (room.ownerUid !== user.uid) throw new Error('only owner can start');
-        await updateDoc(roomRef, { status: 'countdown', startAt: serverTimestamp?.() || nowMs() });
-    }
-    async function updateProgress(roomId, progress) {
-        if (!db) return;
-        const user = safeUser(); if (!user) return;
-        const playerRef = doc(db, 'rooms', roomId, 'players', user.uid);
-        await updateDoc(playerRef, { progress: Math.max(0, Math.min(100, progress)), lastSeen: serverTimestamp?.() || nowMs() });
-    }
-    async function finishRun(roomId, timeMs) {
-        if (!db) return;
-        const user = safeUser(); if (!user) return;
-        const playerRef = doc(db, 'rooms', roomId, 'players', user.uid);
-        await updateDoc(playerRef, { finished: true, timeMs, lastSeen: serverTimestamp?.() || nowMs() });
-    }
-    function listenRoom(roomId, { onRoom, onPlayers } = {}) {
-        if (!db) return () => { };
-        const roomRef = doc(db, 'rooms', roomId);
-        const unsubRoom = onSnapshot?.(roomRef, (sn) => { if (sn.exists() && onRoom) onRoom({ id: sn.id, ...sn.data() }); });
-        const playersRef = collection?.(db, 'rooms', roomId, 'players');
-        const unsubPlayers = onSnapshot?.(playersRef, (snap) => {
-            const arr = []; snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
-            if (onPlayers) onPlayers(arr);
-        });
-        return () => { try { unsubRoom && unsubRoom(); } catch { } try { unsubPlayers && unsubPlayers(); } catch { } };
-    }
-    window.multiplayer = { createRoom, joinRoom, setReady, startCountdown, updateProgress, finishRun, listenRoom };
-
-    // ===== 7) Ghost Recorder (scaffold) =====
-    const ghost = {
-        active: false,
-        startTime: 0,
-        events: [],
-        start() { this.active = true; this.startTime = Date.now(); this.events = []; },
-        stop() { this.active = false; },
-        push(type, payload = {}) {
-            if (!this.active) return;
-            this.events.push({ t: Date.now() - this.startTime, type, ...payload });
-        }
     };
-    window.ghost = ghost;
 
-    // ===== Hook into best-time update to trigger effects/badges/challenges =====
-    const __orig_updateUserBestTime = typeof updateUserBestTime === 'function' ? updateUserBestTime : null;
-    if (__orig_updateUserBestTime) {
-        window.updateUserBestTime = async function (userId, gameKey, newTime) {
-            const result = await __orig_updateUserBestTime.apply(this, arguments);
-            try {
-                confettiBurst();
-                await awardBadgesIfAny({ modeKey: gameKey, timeSec: Number(newTime) || 0 });
-                await saveChallengeResult({ modeKey: gameKey, timeMs: Math.round((Number(newTime) || 0) * 1000) });
-            } catch (e) {
-                console.warn('[feature-pack] post-best-time hooks failed', e);
-            }
-            return result;
-        };
-    }
-
-    try { initDynamicBackground(); } catch { }
-})();
-
+    initializeApp();
+});
