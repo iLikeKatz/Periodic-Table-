@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Leaderboard | Periodic Table</title>
+
+  <link rel="stylesheet" href="theme.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="leaderboard.css">
+
+  <script src="theme.js"></script>
+  <script type="module" src="firebase_init.js"></script>
+  <script src="script_all_features.js" defer></script>
+  <script type="module" src="leaderboard.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="index.html">← กลับ</a>
+    <h1>🏆 Leaderboard</h1>
+
+  </header>
+
+  <main class="container">
+    <div class="switcher" role="tablist" aria-label="เลือกลีดเดอร์บอร์ด">
+      <button id="btn-main" class="switch active" role="tab" aria-selected="true" aria-controls="board" data-mode="main">
+        8 หมู่หลัก
+      </button>
+      <button id="btn-all" class="switch" role="tab" aria-selected="false" aria-controls="board" data-mode="all">
+        ธาตุทั้งหมด
+      </button>
+      <div class="spacer"></div>
+    </div>
+
+    <div id="board" class="board">
+      <div id="loading" class="loading">กำลังโหลดข้อมูล...</div>
+      <div id="error" class="error hidden"></div>
+      <table id="table" class="hidden">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ผู้เล่น</th>
+            <th>เวลา</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <small>เคล็ดลับ: ลงชื่อเข้าใช้แล้วทำเวลาให้ดีที่สุด ระบบจะอัปเดตอันดับอัตโนมัติ</small>
+  </footer>
+</body>
+</html>

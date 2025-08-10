@@ -1,0 +1,82 @@
+#mp-hud{
+  position: fixed;
+  right: 12px;
+  top: 70px;
+  width: 320px;
+  max-height: 60vh;
+  background: rgba(10,12,16,.92);
+  color: #e8eaed;
+  border: 1px solid #2a2f39;
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 2000;
+  box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  backdrop-filter: blur(6px);
+}
+#mp-hud.collapsed .hud-body{ display:none; }
+#mp-hud .hud-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 10px; background:#12151a; border-bottom:1px solid #232833;
+  font-size: .95rem;
+}
+#mp-hud .hud-head button{
+  background:#232833; color:#e8eaed; border:1px solid #2a2f39; border-radius:8px; padding:4px 8px; cursor:pointer;
+}
+#mp-hud .hud-body{ padding:8px; overflow:auto; max-height: 48vh; }
+#mp-hud .hud-row{ display:flex; gap:8px; align-items:center; padding:8px; border-radius:10px; background:#0b0d11; border:1px solid #20242c; margin-bottom:8px; }
+#mp-hud .hud-row.me{ outline: 1px solid #FFD43B; }
+#mp-hud .avatar{ width:28px; height:28px; border-radius:50%; background:#0b0d11; border:1px solid #2a2f39; object-fit:cover }
+#mp-hud .flex{ flex:1; }
+#mp-hud .top{ display:flex; justify-content:space-between; align-items:center; font-size:.95rem; margin-bottom:6px }
+#mp-hud .name{ font-weight:700 }
+#mp-hud .stat{ color:#cbd5e1 }
+#mp-hud .bar{ height:8px; background:#101319; border-radius:999px; overflow:hidden; border:1px solid #2a2f39 }
+#mp-hud .fill{ height:100%; background: linear-gradient(90deg,#52ffa8,#FFD43B) }
+#mp-hud .time-bar{ background:#101319; border-radius:999px; border:1px solid #2a2f39; color:#cbd5e1; text-align:center; padding:2px 0; font-size:.85rem }
+
+/* ===================== */
+/* LIGHT THEME (OVERRIDE) */
+/* ===================== */
+:root[data-theme="light"] #mp-hud{
+  background: rgba(255,255,255,.92);   /* glass ใสฝั่ง light */
+  color: #1e293b;
+  border: 1px solid #e6eaf0;
+  box-shadow: 0 10px 30px rgba(0,0,0,.10);
+  backdrop-filter: blur(6px);
+}
+
+:root[data-theme="light"] #mp-hud .hud-head{
+  background: #ffffff;
+  border-bottom: 1px solid #e6eaf0;
+}
+:root[data-theme="light"] #mp-hud .hud-head button{
+  background: #eef2f8;
+  color: #1e293b;
+  border: 1px solid #dfe3ea;
+}
+
+:root[data-theme="light"] #mp-hud .hud-row{
+  background: #f7f9fc;
+  border: 1px solid #e6eaf0;
+}
+:root[data-theme="light"] #mp-hud .avatar{
+  background: #f3f6fb;
+  border: 1px solid #dfe3ea;
+}
+:root[data-theme="light"] #mp-hud .stat{
+  color: #64748b;         /* muted */
+}
+
+:root[data-theme="light"] #mp-hud .bar{
+  background: #e9eef7;
+  border: 1px solid #dfe3ea;
+}
+:root[data-theme="light"] #mp-hud .fill{
+  background: linear-gradient(90deg,#52ffa8,#FFC944); /* เข้ากับพาเลตต์ light */
+}
+
+:root[data-theme="light"] #mp-hud .time-bar{
+  background: #eef2f8;
+  border: 1px solid #dfe3ea;
+  color: #64748b;
+}

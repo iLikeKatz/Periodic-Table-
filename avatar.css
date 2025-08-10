@@ -1,0 +1,119 @@
+/* เดิม: :root{ --bg:#0f1115; --panel:#171a20; ... }  <-- ลบ/แก้เป็นแบบนี้ */
+:root[data-theme="dark"]{
+  --bg:#0f1115;
+  --panel:#171a20;
+  --text:#e8eaed;
+  --muted:#a4a9b3;
+  --accent:#FFD43B;
+  --accent2:#FFE866;
+}
+
+body{margin:0; font-family:'IBM Plex Sans Thai',system-ui,sans-serif; background:var(--bg); color:var(--text);}
+.topbar{display:flex; align-items:center; gap:12px; padding:12px 16px; background:#12151a; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.topbar h1{font-size:1.2rem; margin:0}
+.back{color:var(--accent); text-decoration:none; border:1px solid #2a2f39; padding:6px 10px; border-radius:8px;}
+.container{max-width:860px; margin:18px auto; padding:0 16px;}
+.card{display:grid; grid-template-columns:220px 1fr; gap:18px; background:var(--panel); border:1px solid #22262e; border-radius:16px; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.preview{display:grid; place-items:center;}
+.preview img{width:180px; height:180px; border-radius:18px; background:#0b0d11; border:1px solid #2a2f39; box-shadow: inset 0 1px 0 rgba(255,255,255,.04)}
+.controls label{display:block; margin-bottom:10px; color:var(--muted)}
+.controls input,.controls select{width:100%; background:#0b0d11; border:1px solid #2a2f39; color:var(--text); padding:10px 12px; border-radius:10px; outline:none}
+.controls input:focus,.controls select:focus{border-color:#394152}
+.btns{display:flex; gap:8px; margin-top:10px}
+button{appearance:none; background:#232833; border:1px solid #2a2f39; color:#e8eaed; padding:10px 14px; border-radius:10px; cursor:pointer}
+button.primary{background:linear-gradient(180deg,var(--accent2),var(--accent)); border-color:#caa100; color:#111; font-weight:700}
+button[disabled]{opacity:.6; cursor:not-allowed}
+button:hover:not([disabled]){filter:brightness(1.05)}
+.tip{color:var(--muted); font-size:.9rem; margin:10px 0 0}
+.status{margin-top:6px; font-size:.95rem}
+.status.ok{color:#7ee787} .status.err{color:#ff7b72}
+/* === THEME COLOR TOKENS (ใช้สีเดิมเป็นค่า default/dark) === */
+:root{
+  /* เดิม (Dark) — ใช้ค่าที่คุณมีอยู่แล้ว */
+  --c-bg:            #0f1115;  /* body bg */
+  --c-topbar:        #12151a;
+  --c-panel:         #171a20;  /* .card */
+  --c-surface:       #0b0d11;  /* input/preview bg */
+  --c-border-1:      #2a2f39;  /* ส่วนใหญ่ */
+  --c-border-2:      #22262e;  /* ขอบของ .card */
+  --c-btn:           #232833;
+  --c-text:          #e8eaed;
+  --c-muted:         #a4a9b3;
+  --c-accent:        #FFD43B;  /* ใช้ร่วมกับ var(--accent) เดิมได้ */
+  --c-accent2:       #FFE866;
+
+  --c-success:       #7ee787;
+  --c-error:         #ff7b72;
+  --c-focus:         #394152;
+
+  --c-shadow:        rgba(0,0,0,.35);  /* เงา .card */
+  --c-topbar-shadow: rgba(0,0,0,.4);   /* เงา topbar */
+  --c-inset:         rgba(255,255,255,.04); /* inset ของรูป preview */
+}
+
+/* Light mode — ปรับแค่ “ค่าสี” ไม่แตะ layout */
+:root[data-theme="light"]{
+  --c-bg:            #f5f7fb;
+  --c-topbar:        #ffffff;
+  --c-panel:         #ffffff;
+  --c-surface:       #f7f9fc;
+  --c-border-1:      #dfe3ea;
+  --c-border-2:      #e5e9f0;
+  --c-btn:           #f0f3f8;
+  --c-text:          #1f2328;
+  --c-muted:         #59636e;
+
+  /* ยังใช้ accent เดิมสีเหลืองเพื่อโทนเดียวกับโปรเจกต์ */
+  --c-accent:        #FFD43B;
+  --c-accent2:       #FFE866;
+
+  --c-success:       #2a7a3b;
+  --c-error:         #b83a36;
+  --c-focus:         #7aa3ff;
+
+  --c-shadow:        rgba(0,0,0,.12);
+  --c-topbar-shadow: rgba(0,0,0,.08);
+  --c-inset:         rgba(255,255,255,.65);
+}
+
+/* === OVERRIDES เฉพาะ “สี” เท่านั้น (คง layout/spacing/shadow เดิม) === */
+body{ background: var(--c-bg); color: var(--c-text); }
+.topbar{ background: var(--c-topbar); box-shadow:0 2px 10px var(--c-topbar-shadow); }
+.back{ color: var(--c-accent); border-color: var(--c-border-1); }
+
+.card{
+  background: var(--c-panel);
+  border-color: var(--c-border-2);
+  box-shadow: 0 8px 24px var(--c-shadow);
+}
+
+.preview img{
+  background: var(--c-surface);
+  border-color: var(--c-border-1);
+  box-shadow: inset 0 1px 0 var(--c-inset);
+}
+
+.controls label{ color: var(--c-muted); }
+.controls input, .controls select{
+  background: var(--c-surface);
+  border-color: var(--c-border-1);
+  color: var(--c-text);
+}
+.controls input:focus, .controls select:focus{ border-color: var(--c-focus); }
+
+button{
+  background: var(--c-btn);
+  border-color: var(--c-border-1);
+  color: var(--c-text);
+}
+button.primary{
+  background: linear-gradient(180deg, var(--c-accent2), var(--c-accent));
+  border-color: #caa100; /* คงไว้ตามเดิมเพื่อโทนปุ่ม */
+  color:#111;
+}
+.tip{ color: var(--c-muted); }
+.status.ok{ color: var(--c-success); }
+.status.err{ color: var(--c-error); }
+
+@media(max-width:720px){ .card{grid-template-columns:1fr} .preview img{width:160px; height:160px} }
+

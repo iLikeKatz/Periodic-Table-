@@ -5,15 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Periodic Table Game with Timer</title>
+
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&family=Roboto:wght@700&display=swap" rel="stylesheet">
+  <script src="index_bootstrap.js"></script>
+   <link rel="stylesheet" href="mp_hud.css">
+
+    <script type="module" src="firebase_init.js"></script>
+
+    
+    <script src="script_all_features.js" defer></script>
+    <script src="index_integration.js" defer></script>
+    <script src="mp_hud.js" defer></script>
+    <script src="progress_watcher.js" defer></script> </head>
+
+<body>
 </head>
 
 <body>
-
-    <div id="settings-container">
+<div id="settings-container">
         <button id="settings-btn">⚙️ ตั้งค่า</button>
     </div>
 
@@ -28,6 +40,12 @@
             <img id="profile-pic" src="https://via.placeholder.com/80" alt="Profile Picture">
             <h3 id="username-display">Username</h3>
             <button id="edit-profile-btn" class="edit-profile-button">แก้ไขโปรไฟล์</button>
+            <div id="profile-links" class="profile-links">
+                <a class="profile-link" href="leaderboard.html">🏆 Leaderboard</a>
+                <a class="profile-link" href="multiplayer.html">🤝 Multiplayer</a>
+                <a class="profile-link" href="avatar.html">🧩 Avatar</a>
+            </div>
+
             <div id="best-times-container">
                 <h4>สถิติเวลาที่ดีที่สุด (เติมตาราง)</h4>
                 <p><strong>ธาตุทั้งหมด:</strong> <span id="best-time-all">N/A</span></p>
@@ -260,6 +278,66 @@
     </script>
     
     <script src="script.js"></script>
+
+<script>
+(function(){
+  function getQuery(){ const u = new URL(location.href); return Object.fromEntries(u.searchParams.entries()); }
+  function tryStart(mode){
+    try { if (typeof setGameMode==='function') setGameMode(mode); } catch(e){}
+    if (typeof startGame==='function') { startGame(); return true; }
+    const btn = document.querySelector('#start, #start-btn, .start-btn, button[data-start]');
+    if (btn) { btn.click(); return true; }
+    return false;
+  }
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const q = getQuery();
+    if (q.room && q.mode) {
+      if (!document.getElementById('mp-banner')) {
+        const bar = document.createElement('div');
+        bar.id = 'mp-banner';
+        bar.style.cssText = 'position:sticky;top:0;background:#222;color:#fff;padding:8px 12px;z-index:1001;border-bottom:1px solid #333';
+        bar.textContent = `Multiplayer room: ${q.room} | mode: ${q.mode}`;
+        document.body.prepend(bar);
+      }
+      // Expose hooks
+      window.reportProgress = (p)=>{ try{ if(window.multiplayer) window.multiplayer.updateProgress(q.room, Math.max(0,Math.min(100,Math.round(p)))); }catch(e){} };
+      window.reportFinish = (ms)=>{ try{ if(window.multiplayer) window.multiplayer.finishRun(q.room, Math.max(0,Math.round(ms))); }catch(e){} };
+      // Aggressive start loop (max 5s)
+      let attempts = 0;
+      const t = setInterval(()=>{
+        attempts++;
+        if (tryStart(q.mode)) { clearInterval(t); }
+        if (attempts > 16) { clearInterval(t); }
+      }, 300);
+    }
+  });
+})();
+</script>
+
+  <script src="mp_hud.js">
+    
+  </script>
+  <script>
+  (function () {
+    const room = new URL(location.href).searchParams.get('room');
+    if (!room) return;
+
+    // ตั้ง selector ให้ตรงกับ DOM ของคุณ (ดูข้อ 3)
+    window.MP_PROBE_CONFIG = {
+      totalSelectors: ['#fill-periodic-table .placeholder-element'],
+      correctSelectors: ['#fill-periodic-table .correct-placement'],
+      throttleMs: 600
+    };
+
+    // โหลด HUD + Watcher แค่ตอนอยู่ในห้อง
+    const s1 = document.createElement('script'); s1.src = 'mp_hud.js';
+    const s2 = document.createElement('script'); s2.src = 'progress_watcher.js';
+    document.body.appendChild(s1);
+    document.body.appendChild(s2);
+  })();
+</script>
+
+  
 </body>
 
 </html>

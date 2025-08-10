@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Avatar | Periodic Table</title>
+
+  <!-- Fonts & CSS -->
+  <link rel="stylesheet" href="theme.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="avatar.css">
+
+  <!-- Firebase + Feature Pack (DO NOT load script.js or script_index.js here) -->
+  <script src="theme.js"></script>
+  <script type="module" src="firebase_init.js"></script>
+  <script src="script_all_features.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="index.html">← กลับ</a>
+    <h1>ปรับแต่ง Avatar</h1>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="preview">
+        <img id="avatar-img" alt="avatar preview" />
+      </div>
+      <div class="controls">
+        <label>สไตล์
+          <select id="style">
+            <option value="bottts">Bottts (หุ่นยนต์)</option>
+            <option value="adventurer">Adventurer</option>
+            <option value="thumbs">Thumbs</option>
+            <option value="identicon">Identicon</option>
+            <option value="pixel-art">Pixel Art</option>
+          </select>
+        </label>
+        <label>Seed
+          <input id="seed" type="text" placeholder="ใส่คำอะไรก็ได้ เช่น Lunar" />
+        </label>
+        <div class="btns">
+          <button id="random" type="button">สุ่ม</button>
+          <button id="save" class="primary" type="button" disabled>บันทึก</button>
+        </div>
+        <p class="tip">ระบบนี้ไม่ใช้ไฟล์ภาพ — ใช้ DiceBear seed สร้างภาพอัตโนมัติ</p>
+        <p id="status" class="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ใช้ DOMContentLoaded เพื่อกัน element ยังไม่พร้อม
+    document.addEventListener('DOMContentLoaded', () => {
+      const img = document.getElementById('avatar-img');
+      const styleSel = document.getElementById('style');
+      const seedInput = document.getElementById('seed');
+      const randomBtn = document.getElementById('random');
+      const saveBtn = document.getElementById('save');
+      const statusEl = document.getElementById('status');
+
+      
+
+      // --- Ensure saveAvatarSeed exists for this page ---
+      if (typeof window.saveAvatarSeed !== 'function') {
+        window.saveAvatarSeed = async (combo) => {
+          const user = await (window.whenAuthReady || Promise.resolve(null));
+          if (!user) throw new Error('ต้องล็อกอินก่อน');
+          const { db, doc, setDoc, serverTimestamp } = window.firebaseDb || {};
+          if (!db || !setDoc || !doc) throw new Error('Firestore is not ready');
+          const value = String(combo || '').trim();
+          await setDoc(doc(db, 'users', user.uid), {
+            avatarSeed: value,
+            updatedAt: (typeof serverTimestamp === 'function' ? serverTimestamp() : null)
+          }, { merge: true });
+          return true;
+        };
+      }
+
+if (!img || !styleSel || !seedInput || !randomBtn || !saveBtn) {
+        console.error('[avatar] Missing DOM elements'); 
+        return;
+      }
+
+      function decodeSeed(combo) {
+        // combo = "style:seed" (ถ้าเคยเซฟไว้แบบนี้)
+        if (!combo) return { style: 'bottts', seed: 'Lunar' };
+        const idx = combo.indexOf(':');
+        if (idx === -1) return { style: 'bottts', seed: combo };
+        return { style: combo.slice(0, idx) || 'bottts', seed: combo.slice(idx + 1) || 'Lunar' };
+      }
+
+      function avatarUrl(style, seed, size = 160) {
+        return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=${size}&radius=50`;
+      }
+
+      function refreshPreview() {
+        const style = styleSel.value;
+        const seed = seedInput.value.trim() || 'Lunar';
+        img.src = avatarUrl(style, seed);
+      }
+
+      function randomSeed() {
+        const s = Math.random().toString(36).slice(2, 10);
+        seedInput.value = s;
+        refreshPreview();
+      }
+
+      // Init: รอ auth พร้อมแล้วค่อย enable ปุ่ม save
+      (async () => {
+        try {
+          const user = await (window.whenAuthReady || Promise.resolve(null));
+          saveBtn.disabled = !user;
+          if (!user) {
+            statusEl.textContent = 'โปรดล็อกอินก่อนบันทึก';
+            statusEl.className = 'status err';
+          } else {
+            statusEl.textContent = '';
+            statusEl.className = 'status';
+            // พยายาม preload ค่า avatar เดิมจาก users/{uid}
+            try {
+              const { db, doc, getDoc } = window.firebaseDb || {};
+              if (db && doc && getDoc) {
+                const snap = await getDoc(doc(db, 'users', user.uid));
+                const data = snap.exists() ? snap.data() : null;
+                const combo = data?.avatarSeed; // เราเก็บแบบ "style:seed"
+                if (combo) {
+                  const { style, seed } = decodeSeed(combo);
+                  styleSel.value = style;
+                  seedInput.value = seed;
+                }
+              }
+            } catch (e) { /* ignore preload error */ }
+          }
+        } catch (e) {
+          saveBtn.disabled = true;
+          statusEl.textContent = 'โหลดสถานะล็อกอินไม่สำเร็จ';
+          statusEl.className = 'status err';
+        } finally {
+          refreshPreview();
+        }
+      })();
+
+      // Events (ใส่การ์ดกัน null แล้ว)
+      randomBtn.addEventListener('click', randomSeed);
+      styleSel.addEventListener('change', refreshPreview);
+      seedInput.addEventListener('input', refreshPreview);
+      saveBtn.addEventListener('click', async () => {
+        if (saveBtn.disabled) return;
+        try {
+          const style = styleSel.value;
+          const seed = seedInput.value.trim() || 'Lunar';
+          if (typeof window.saveAvatarSeed !== 'function') {
+            throw new Error('saveAvatarSeed is not available');
+          }
+          await window.saveAvatarSeed(`${style}:${seed}`);
+          statusEl.textContent = 'บันทึกแล้ว ✓';
+          statusEl.className = 'status ok';
+        } catch (e) {
+          console.error(e);
+          statusEl.textContent = 'บันทึกไม่สำเร็จ โปรดล็อกอินก่อน';
+          statusEl.className = 'status err';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

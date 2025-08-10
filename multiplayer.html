@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Multiplayer | Periodic Table</title>
+
+  <link rel="stylesheet" href="theme.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="multiplayer.css">
+  
+  <script src="theme.js"></script>
+  <script type="module" src="firebase_init.js"></script>
+  <script src="script_all_features.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="index.html">← กลับ</a>
+    <h1>โหมดท้าดวลกับเพื่อน (Multiplayer)</h1>
+    <div id="auth-hint" class="auth-hint">โปรดล็อกอินก่อนเริ่มเล่น</div>
+  </header>
+
+  <main class="container">
+    <section class="grid">
+      <div class="card">
+        <h2>สร้างห้อง</h2>
+        <label>โหมด
+          <select id="mode">
+            <option value="main_groups">8 หมู่หลัก</option>
+            <option value="all_elements">ธาตุทั้งหมด</option>
+          </select>
+        </label>
+        <label>ประเภทเกม
+          <select id="gameType">
+            <option value="table">เติมตารางธาตุ</option>
+            <option value="flashcard">Flashcard</option>
+          </select>
+        </label>
+        <label>เวลารอบ (วินาที)
+          <input id="roundSec" type="number" min="30" value="180">
+        </label>
+        <button id="create" class="primary" disabled>สร้างห้อง</button>
+        <p class="hint">สร้างแล้วแชร์รหัสห้องให้เพื่อนเข้า</p>
+      </div>
+
+      <div class="card">
+        <h2>เข้าห้อง</h2>
+        <label>รหัสห้อง
+          <input id="roomId" type="text" placeholder="เช่น 4F7A9C">
+        </label>
+        <div class="btns">
+          <button id="join" disabled>เข้าห้อง</button>
+          <button id="copy" title="คัดลอกรหัส">คัดลอก</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="lobby" class="card hidden">
+      <div class="lobby-head">
+        <div>ห้อง: <strong id="rid">-</strong></div>
+        <div class="status">สถานะ: <span id="status">lobby</span></div>
+      </div>
+      <div class="room-info">
+        <div>โหมด: <span id="room-mode">-</span></div>
+        <div>ประเภทเกม: <span id="room-game">-</span></div>
+        <div>เวลารอบ: <span id="room-duration">-</span> วินาที</div>
+      </div>
+      <div class="players" id="players"></div>
+
+      <div class="actions">
+        <button id="ready" class="ghost">พร้อม!</button>
+        <button id="start" class="primary" disabled>เริ่มนับถอยหลัง</button>
+        <button id="leave" class="ghost">ออกจากห้อง</button>
+      </div>
+
+      <div id="countdown" class="countdown hidden">5</div>
+    </section>
+
+    <section id="podium" class="card hidden">
+      <h2>ผลการแข่งขัน</h2>
+      <ol id="results" class="results"></ol>
+      <div class="actions">
+        <button id="rematch">เริ่มใหม่</button>
+        <button id="exit" class="ghost">ออกจากห้อง</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const $ = (q)=>document.querySelector(q);
+      const playersEl = $('#players');
+      const lobby = $('#lobby');
+      const podium = $('#podium');
+      const statusEl = $('#status');
+      const ridEl = $('#rid');
+      const cdEl = $('#countdown');
+      const authHint = $('#auth-hint');
+      const createBtn = $('#create');
+      const joinBtn = $('#join');
+      const copyBtn = $('#copy');
+      const readyBtn = $('#ready');
+      const startBtn = $('#start');
+      const leaveBtn = $('#leave');
+      const roomModeEl = $('#room-mode');
+      const roomGameEl = $('#room-game');
+      const roomDurEl = $('#room-duration');
+      const modeSel = document.getElementById('mode');
+      const gameSel = document.getElementById('gameType');
+      const roundSecInput = document.getElementById('roundSec');
+      const roomIdInput = document.getElementById('roomId');
+
+      let currentRoom = null;
+      let unsub = null;
+      let iAmOwner = false;
+      let playerProfiles = new Map();
+      let latestPlayers = [];
+      let myReady = false;
+      let finishedShown = false;
+      let countdownTimer = null;
+      let countdownDeadline = 0;
+      const DEFAULT_COUNTDOWN_SEC = 5;
+
+      const fmt = (ms) => {
+        if(ms===null || ms===undefined) return '-';
+        const s=Math.floor(ms/1000), m=Math.floor(s/60), ss=String(s%60).padStart(2,'0'); 
+        return m+':'+ss;
+      };
+
+      // Auth gate
+      (async () => {
+        const user = await (window.whenAuthReady || Promise.resolve(null));
+        const authed = !!user;
+        authHint.style.display = authed ? 'none' : 'block';
+        createBtn.disabled = !authed;
+        joinBtn.disabled = !authed;
+      })();
+
+      function showLobby(id){ lobby.classList.remove('hidden'); podium.classList.add('hidden'); ridEl.textContent=id; }
+      function showPodium(){ lobby.classList.add('hidden'); podium.classList.remove('hidden'); }
+
+      async function fetchProfile(uid){
+        try {
+          const { db, doc, getDoc } = window.firebaseDb || {};
+          if (!db) return null;
+          const snap = await getDoc(doc(db, 'users', uid));
+          return snap.exists() ? snap.data() : null;
+        } catch { return null; }
+      }
+      
+      function avatarUrlFromSeed(seedOrCombo = 'default', style = 'bottts', size = 64) {
+        try {
+          let combo = String(seedOrCombo || 'default');
+          let st = style, sd = combo;
+          if (combo.includes(':')) {
+            const parts = combo.split(':');
+            st = parts[0] || style;
+            sd = parts[1] || 'default';
+          }
+          return `https://api.dicebear.com/7.x/${st}/svg?seed=${encodeURIComponent(sd)}&size=${size}&radius=50`;
+        } catch { 
+          return `https://api.dicebear.com/7.x/identicon/svg?seed=guest`;
+        }
+      }
+      window.resolveAvatarUrl = function(profile){
+        try {
+          if (profile?.avatarUrl) return profile.avatarUrl;
+          if (profile?.avatarSeed) return avatarUrlFromSeed(profile.avatarSeed);
+          return null;
+        } catch { return null; }
+      };
+
+      function avatarFor(uid, profile){
+        try {
+          const url = (typeof window.resolveAvatarUrl === 'function')
+            ? window.resolveAvatarUrl(profile)
+            : null;
+          return url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(uid.slice(0,8));
+        } catch { 
+          return 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(uid.slice(0,8));
+        }
+      }
+
+      async function renderPlayers(arr){
+        playersEl.innerHTML = '';
+
+        await Promise.all(arr.map(async p => {
+          if (!playerProfiles.has(p.id)) {
+            const prof = await fetchProfile(p.id);
+            playerProfiles.set(p.id, prof);
+          }
+        }));
+
+        const me = window.firebaseAuth?.auth?.currentUser?.uid || '';
+        arr.forEach(p=>{
+          const row = document.createElement('div');
+          row.className = 'player';
+          const avatar = document.createElement('img');
+          avatar.className = 'avatar';
+          avatar.src = avatarFor(p.id, playerProfiles.get(p.id));
+          const name = document.createElement('span');
+          name.className = 'name';
+          name.textContent = p.username + (p.id===me?' (คุณ)':'');
+          const bar = document.createElement('div');
+          bar.className = 'bar';
+          const fill = document.createElement('div');
+          fill.className = 'fill';
+          fill.style.width = (p.progress||0) + '%';
+          bar.appendChild(fill);
+          const meta = document.createElement('span');
+          meta.className = 'meta';
+          meta.textContent = (p.ready?'✅ Ready ':'') + (p.finished?('⏱ '+fmt(p.timeMs)) : '');
+          row.appendChild(avatar);
+          row.appendChild(name);
+          row.appendChild(bar);
+          row.appendChild(meta);
+          playersEl.appendChild(row);
+          if (p.id === me) myReady = !!p.ready;
+        });
+        
+        readyBtn.textContent = myReady ? 'ยกเลิกพร้อม' : 'พร้อม!';
+      }
+
+      function updateStartButtonState(){
+        const allReady = latestPlayers.length > 0 && latestPlayers.every(p => !!p.ready);
+        startBtn.disabled = !(iAmOwner && allReady);
+      }
+
+      function toMillis(ts) {
+        if (!ts) return 0;
+        if (typeof ts.toDate === 'function') return ts.toDate().getTime();
+        if (ts.seconds) return ts.seconds * 1000 + Math.floor((ts.nanoseconds || 0)/1e6);
+        if (ts instanceof Date) return ts.getTime();
+        if (typeof ts === 'number') return ts;
+        return 0;
+      }
+
+      let navigated = false;
+      function goToGame(mode, gameType){
+        if (navigated) return; navigated = true;
+        const url = `index.html?room=${currentRoom}&mode=${mode}&game=${gameType||'table'}`;
+        window.location.href = url;
+      }
+
+      function startLocalCountdown(room) {
+        const serverStart = toMillis(room.startAt);
+        if (!serverStart) return;
+        countdownDeadline = serverStart + DEFAULT_COUNTDOWN_SEC * 1000;
+        cdEl.classList.remove('hidden');
+        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+        const tick = async () => {
+          const left = Math.max(0, countdownDeadline - Date.now());
+          const sec = Math.ceil(left / 1000);
+          cdEl.textContent = String(sec);
+          if (left <= 0) {
+            clearInterval(countdownTimer); countdownTimer = null;
+            try {
+              if (iAmOwner) {
+                const { db, doc, updateDoc } = window.firebaseDb || {};
+                await updateDoc(doc(db, 'rooms', currentRoom), { status: 'playing' });
+              }
+            } catch (e) { /* ignore */ }
+            cdEl.classList.add('hidden');
+          }
+        };
+        tick();
+        countdownTimer = setInterval(tick, 100);
+      }
+      
+      async function wire(roomId){
+        if (unsub) { try{unsub();}catch{}; unsub=null; }
+        unsub = window.multiplayer.listenRoom(roomId, {
+          onRoom: (r)=>{
+            statusEl.textContent = r.status;
+            roomModeEl.textContent = (r.mode === 'main_groups') ? '8 หมู่หลัก' : 'ธาตุทั้งหมด';
+            roomGameEl.textContent = r.gameType === 'flashcard' ? 'Flashcard' : 'เติมตารางธาตุ';
+            roomDurEl.textContent = r.roundSec || 0;
+            iAmOwner = (r.ownerUid === (window.firebaseAuth?.auth?.currentUser?.uid || ''));
+            startBtn.style.display = iAmOwner ? 'inline-block' : 'none';
+            updateStartButtonState();
+
+            if (r.status === 'countdown') startLocalCountdown(r);
+            else if (r.status === 'finished') buildResultsFromDOM();
+            else if (r.status === 'playing') {
+              cdEl.classList.add('hidden');
+              goToGame(r.mode || 'main_groups', r.gameType || 'table');
+            }
+          },
+          onPlayers: (arr)=>{
+            latestPlayers = arr;
+            renderPlayers(arr);
+            updateStartButtonState();
+          
+            try {
+              const total = Array.isArray(arr) ? arr.length : 0;
+              const done = total ? arr.filter(p => p && p.finished === true).length : 0;
+              if (!finishedShown && total > 0 && done === total) {
+                finishedShown = true;
+                if (typeof buildResultsFromDOM === 'function') buildResultsFromDOM();
+              }
+            } catch (_) {}
+          }
+        });
+      }
+
+      function buildResultsFromDOM(){
+        const list = document.getElementById('results');
+        list.innerHTML = '';
+        const rows = Array.from(playersEl.children);
+        const items = rows.map(row => {
+          const name = row.querySelector('.name').textContent;
+          const meta = row.querySelector('.meta').textContent;
+          const match = /⏱\s(\d+:\d+)/.exec(meta);
+          const time = match ? match[1] : null;
+          const [m,s] = time?time.split(':').map(Number):[99,99];
+          const ms = time ? (m*60+s)*1000 : Infinity;
+          return { name, ms };
+        }).sort((a,b)=>a.ms-b.ms);
+        items.forEach((it,i)=>{
+          const li = document.createElement('li');
+          li.textContent = (it.ms===Infinity) ? `-` : `#${i+1} ${it.name} — ${fmt(it.ms)}`;
+          list.appendChild(li);
+        });
+        showPodium();
+      }
+
+      // Controls
+      createBtn.addEventListener('click', async ()=>{
+        try {
+          const mode = modeSel.value;
+          const roundSec = Math.max(30, parseInt(roundSecInput.value||'180',10));
+          const gameType = gameSel.value || 'table';
+          const id = await window.multiplayer.createRoom({ mode, roundSec, gameType });
+          currentRoom = id;
+          showLobby(id); await wire(id);
+          roomIdInput.value = id;
+          navigator.clipboard?.writeText(id).catch(()=>{});
+        } catch(e) { alert('สร้างห้องไม่สำเร็จ: ' + (e?.message || e)); }
+      });
+
+      joinBtn.addEventListener('click', async ()=>{
+        try {
+          const id = (roomIdInput.value||'').trim().toUpperCase();
+          if(!id) return alert('กรอกรหัสห้องก่อน');
+          await window.multiplayer.joinRoom(id);
+          currentRoom = id;
+          showLobby(id); await wire(id);
+        } catch(e) { alert('เข้าห้องไม่สำเร็จ: ' + (e?.message || e)); }
+      });
+
+      copyBtn.addEventListener('click', ()=>{
+        const id = (roomIdInput.value||'').trim().toUpperCase();
+        if(!id) return; navigator.clipboard?.writeText(id);
+      });
+
+      readyBtn.addEventListener('click', async ()=>{
+        if(!currentRoom) return;
+        try {
+          await window.multiplayer.setReady(currentRoom, !myReady);
+          myReady = !myReady;
+          readyBtn.textContent = myReady ? 'ยกเลิกพร้อม' : 'พร้อม!';
+        } catch (e) {}
+      });
+
+      startBtn.addEventListener('click', async ()=>{
+        try {
+          if(!currentRoom || !iAmOwner) return;
+          const allReady = latestPlayers.length > 0 && latestPlayers.every(p => !!p.ready);
+          if (!allReady) { alert('ให้ทุกคนกดพร้อมก่อนจึงจะเริ่มได้'); return; }
+          await window.multiplayer.startCountdown(currentRoom, DEFAULT_COUNTDOWN_SEC);
+        } catch(e) { alert('เริ่มนับถอยหลังไม่ได้: ' + (e?.message || e)); }
+      });
+
+      // --- ส่วนที่แก้ไข: Logic ของปุ่มออกจากห้อง ---
+      leaveBtn.addEventListener('click', async () => {
+        if (!currentRoom) {
+            location.reload();
+            return;
+        }
+        
+        const { auth } = window.firebaseAuth || {};
+        const user = auth.currentUser;
+
+        if (user) {
+            // ดึงฟังก์ชันที่จำเป็นจาก window.firebaseDb
+            const { db, doc, deleteDoc } = window.firebaseDb || {};
+
+            // ตรวจสอบว่าฟังก์ชัน deleteDoc พร้อมใช้งาน
+            if (typeof deleteDoc !== 'function') {
+                console.error("ฟังก์ชัน deleteDoc ไม่พร้อมใช้งาน!");
+                location.reload(); // ถ้าไม่พร้อม ให้โหลดหน้าใหม่ไปเลย
+                return;
+            }
+
+            const playerRef = doc(db, 'rooms', currentRoom, 'players', user.uid);
+            
+            if(unsub) { try{unsub();}catch{}; unsub=null; }
+
+            // ใช้ฟังก์ชัน deleteDoc ที่ดึงมาอย่างถูกต้อง
+            await deleteDoc(playerRef).catch(err => console.error("ไม่สามารถออกจากห้องได้:", err));
+        }
+        
+        location.reload();
+      });
+
+      document.getElementById('rematch').addEventListener('click', ()=>{
+        location.reload();
+      });
+
+      const exitBtn = document.getElementById('exit');
+      if (exitBtn) exitBtn.addEventListener('click', ()=>{ window.location.href = 'index.html'; });
+    });
+  </script>
+</body>
+</html>
